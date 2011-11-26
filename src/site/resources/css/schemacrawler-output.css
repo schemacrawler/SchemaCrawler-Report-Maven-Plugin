@@ -1,0 +1,85 @@
+/*
+ * #%L
+ * SchemaCrawler Maven Plugin
+ * %%
+ * Copyright (C) 2011 SchemaCrawler
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as 
+ * published by the Free Software Foundation, either version 3 of the 
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Lesser Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Lesser Public 
+ * License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/lgpl-3.0.html>.
+ * #L%
+ */
+.underscore {
+	color: #950007;
+	border-bottom: 2px solid #BBBBBB;
+}
+
+.name {
+	font-weight: bold;
+	width: 150px;
+}
+
+.description {
+	text-align: right;
+	width: 450px;
+}
+
+.ordinal {
+	width: 20px;
+}
+
+.subname {
+	width: 150px;
+}
+
+.type {
+	width: 150px;
+}
+
+.definition {
+	width: 580px;
+	white-space: pre;
+}
+
+h2 {
+  color: #174188;
+}
+
+h3 {
+  color: #3E8400;
+}
+
+body,p,pre,table,th,td,caption {
+	text-align: left;
+	font-family: Trebuchet MS;
+	font-size: 8pt;
+}
+
+table,th,td {
+	border: 1px solid #EBEBEB;
+	border-collapse: collapse;
+	vertical-align: top;
+	padding: 2px;
+}
+
+table {
+	width: 600px;
+}
+
+caption {
+	font-weight: bold;
+}
+
+hr {
+	height: 1px;
+}

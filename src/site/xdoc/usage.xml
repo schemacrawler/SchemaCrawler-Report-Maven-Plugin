@@ -1,0 +1,98 @@
+<!--
+  #%L
+  SchemaCrawler Maven Plugin
+  %%
+  Copyright (C) 2011 SchemaCrawler
+  %%
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Lesser General Public License as 
+  published by the Free Software Foundation, either version 3 of the 
+  License, or (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Lesser Public License for more details.
+  
+  You should have received a copy of the GNU General Lesser Public 
+  License along with this program.  If not, see
+  <http://www.gnu.org/licenses/lgpl-3.0.html>.
+  #L%
+  -->
+<!DOCTYPE document PUBLIC "-//Apache Software Foundation//DTD XDOC 1.0//EN"
+  "http://maven.apache.org/dtd/xdoc_1_0.dtd">
+<document>
+  <properties>
+    <title>SchemaCrawler Maven Plugin</title>
+    <author email="sualeh@hotmail.com">Sualeh Fatehi</author>
+  </properties>
+  <body>
+    <section name="SchemaCrawler Maven Plugin">
+      <subsection name="SchemaCrawler Maven Plugin - Example pom.xml">
+        <p><source><![CDATA[
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.example</groupId>
+    <artifactId>test-schemacrawler-maven-plugin</artifactId>
+    <packaging>pom</packaging>
+    <version>0.1-SNAPSHOT</version>
+    <name>Test Maven SchemaCrawler Plugin</name>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>net.sourceforge.schemacrawler</groupId>
+                <artifactId>schemacrawler-maven-plugin</artifactId>
+                <version>0.1-SNAPSHOT</version>
+                <dependencies>
+                    <!-- DEFINE JDBC DRIVER DEPENDENCIES HERE, SINCE REPORT PLUGINS CANNOT SPECIFY DEPENDENCIES -->
+                    <dependency>
+                        <groupId>org.hsqldb</groupId>
+                        <artifactId>hsqldb</artifactId>
+                        <version>2.2.4</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>3.0</version>
+                <configuration>
+                    <reportPlugins>
+                        <plugin>
+                            <artifactId>maven-project-info-reports-plugin</artifactId>
+                            <version>2.4</version>
+                            <reportSets>
+                                <reportSet>
+                                    <reports>
+                                        <report>dependencies</report>
+                                        <report>license</report>
+                                    </reports>
+                                </reportSet>
+                            </reportSets>
+                        </plugin>
+                        <!-- DEFINE SchemaCrawler REPORT GENERATION HERE -->
+                        <plugin>
+                            <groupId>net.sourceforge.schemacrawler</groupId>
+                            <artifactId>maven-schemacrawler-plugin</artifactId>
+                            <version>0.1</version>
+                            <configuration>
+                                <config>schemacrawler.config.properties</config>
+                                <driver>org.hsqldb.jdbcDriver</driver>
+                                <url>jdbc:hsqldb:hsql://localhost:9001/schemacrawler</url>
+                                <user>sa</user>
+                                <infolevel>maximum</infolevel>
+                                <command>details</command>
+                            </configuration>
+                        </plugin>
+                    </reportPlugins>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+        ]]></source></p>
+      </subsection>
+    </section>
+  </body>
+</document>

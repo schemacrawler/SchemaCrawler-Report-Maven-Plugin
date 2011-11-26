@@ -1,0 +1,101 @@
+<!--
+  #%L
+  SchemaCrawler Maven Plugin
+  %%
+  Copyright (C) 2011 SchemaCrawler
+  %%
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Lesser General Public License as 
+  published by the Free Software Foundation, either version 3 of the 
+  License, or (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Lesser Public License for more details.
+  
+  You should have received a copy of the GNU General Lesser Public 
+  License along with this program.  If not, see
+  <http://www.gnu.org/licenses/lgpl-3.0.html>.
+  #L%
+  -->
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd
+    http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+  <changeSet id="create-shop-schema" author="awhitford">
+    <preConditions>
+      <or>
+        <dbms type="hsqldb"/>
+        <dbms type="h2"/>
+      </or>
+    </preConditions>
+    <sql>create schema Shop</sql>
+  </changeSet>
+
+  <changeSet id="create-shop-item" author="awhitford">
+    <createTable tableName="Item" schemaName="Shop" remarks="Item for Sale">
+      <column name="id" type="int" autoIncrement="true">
+        <constraints primaryKey="true" primaryKeyName="PK_Item" nullable="false"/>
+      </column>
+      <column name="name" type="varchar(100)" remarks="Item Name">
+        <constraints nullable="false" unique="true" uniqueConstraintName="UI_Item_Name"/>
+      </column>
+      <column name="description" type="varchar(400)" remarks="Item Description">
+        <constraints nullable="false"/>
+      </column>
+      <column name="price" type="CURRENCY" remarks="Item's Price.">
+        <constraints nullable="false"/>
+      </column>
+      <column name="inStock" type="BOOLEAN" defaultValueBoolean="true" remarks="Is the item in stock.">
+        <constraints nullable="false"/>
+      </column>
+      <column name="rating" type="java.sql.Types.TINYINT" remarks="Item's Rating (0 to 5 stars)."/>
+    </createTable>
+  </changeSet>
+
+  <changeSet id="create-shop-cart" author="awhitford">
+    <createTable tableName="Cart" schemaName="Shop" remarks="Shopping Cart">
+      <column name="id" type="int" autoIncrement="true">
+        <constraints primaryKey="true" primaryKeyName="PK_Cart" nullable="false"/>
+      </column>
+      <column name="cookie" type="varchar(100)" remarks="Cookie related to Shopping Cart.">
+        <constraints nullable="false" unique="true" uniqueConstraintName="UI_Cart_Cookie"/>
+      </column>
+      <column name="created" type="DATETIME" remarks="When the cart was created.">
+        <constraints nullable="false"/>
+      </column>
+      <column name="updated" type="DATETIME" remarks="When the cart was last modified.">
+        <constraints nullable="false"/>
+      </column>
+      <column name="expired" type="DATETIME" remarks="If the cart is abandoned, it will eventually expire."/>
+    </createTable>
+  </changeSet>
+
+  <changeSet id="create-shop-cart-item" author="awhitford">
+    <createTable tableName="CartItem" schemaName="Shop" remarks="Shopping Cart Items">
+      <column name="id" type="int" autoIncrement="true">
+        <constraints primaryKey="true" primaryKeyName="PK_CartItem" nullable="false"/>
+      </column>
+      <column name="cart" type="int">
+        <constraints references="Cart(id)" foreignKeyName="FK_CartItem_Cart" nullable="false"/>
+      </column>
+      <column name="item" type="int">
+        <constraints references="Item(id)" foreignKeyName="FK_CartItem_Item" nullable="false"/>
+      </column>
+      <column name="quantity" type="int" defaultValueNumeric="1">
+        <constraints nullable="false"/>
+      </column>
+      <column name="created" type="DATETIME" remarks="When the item was added to the cart.">
+        <constraints nullable="false"/>
+      </column>
+      <column name="updated" type="DATETIME" remarks="When the item was last updated (quantity change).">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+
+</databaseChangeLog>

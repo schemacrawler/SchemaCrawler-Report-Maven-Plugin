@@ -38,6 +38,9 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.doxia.siterenderer.Renderer;
 import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.plugins.annotations.Component;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.reporting.AbstractMavenReport;
 import org.apache.maven.reporting.MavenReportException;
@@ -58,126 +61,98 @@ import sf.util.Utility;
 
 /**
  * Generates a SchemaCrawler report of the database.
- * 
- * @goal schemacrawler
- * @threadSafe true
  */
+@Mojo(name="schemacrawler", requiresReports=true, threadSafe=true)
 public class SchemaCrawlerMojo
   extends AbstractMavenReport
 {
-
-  /**
-   * @parameter expression="${project}"
-   * @required
-   * @readonly
-   */
+  @Component
   private MavenProject project;
 
   /**
    * Config file.
-   * 
-   * @parameter expression="${config}" default-value="config.properties"
-   * @required
    */
+  @Parameter(property="config", defaultValue="config.properties", required=true)
   private String config;
 
   /**
    * Config override file.
-   * 
-   * @parameter expression="${config-override}" alias="config-override"
-   *            default-value="schemacrawler.config.override.properties"
    */
+  @Parameter(property="config-override", defaultValue="schemacrawler.config.override.properties")
   private String configOverride;
 
   /**
    * JDBC driver class name.
-   * 
-   * @parameter expression="${driver}" default-value="${schemacrawler.driver}"
-   * @required
    */
+  @Parameter(property="driver", defaultValue="${schemacrawler.driver}", required=true)
   private String driver;
 
   /**
    * Database connection string.
-   * 
-   * @parameter expression="${url}" default-value="${schemacrawler.url}"
-   * @required
    */
+  @Parameter(property="url", defaultValue="${schemacrawler.url}", required=true)
   private String url;
 
   /**
    * Database connection user name.
-   * 
-   * @parameter expression="${user}" default-value="${schemacrawler.user}"
-   * @required
    */
+  @Parameter(property="user", defaultValue="${schemacrawler.user}", required=true)
   private String user;
 
   /**
    * Database connection user password.
-   * 
-   * @parameter expression="${password}" default-value="${schemacrawler.password}"
    */
+  @Parameter(property="password", defaultValue="${schemacrawler.password}")
   private String password;
 
   /**
    * Command.
-   * 
-   * @parameter expression="${command}"
-   * @required
    */
+  @Parameter(property="command", required=true)
   private String command;
 
   /**
    * The plugin dependencies.
-   * 
-   * @parameter expression="${plugin.artifacts}"
-   * @required
-   * @readonly
    */
+  @Parameter(property="plugin.artifacts", required=true, readonly=true)
   private List<Artifact> pluginArtifacts;
 
   /**
    * Sort tables alphabetically.
-   * 
-   * @parameter expression="${sorttables}" default-value="true"
    */
+  @Parameter(property="sorttables", defaultValue="true")
   private boolean sorttables;
 
   /**
    * Sort columns in a table alphabetically.
-   * 
-   * @parameter expression="${sortcolumns}" default-value="false"
    */
+  @Parameter(property="sortcolumns", defaultValue="false")
   private boolean sortcolumns;
 
   /**
    * Sort parameters in a stored procedure alphabetically.
-   * 
-   * @parameter expression="${sortinout}" default-value="false"
    */
+  @Parameter(property="sortinout", defaultValue="false")
   private boolean sortinout;
 
   /**
    * The info level determines the amount of database metadata
    * retrieved, and also determines the time taken to crawl the schema.
-   * 
-   * @parameter expression="${infolevel}" alias="infolevel"
-   * @required
    */
-  private final String infolevel = InfoLevel.standard.name();
+  @Parameter(property="infolevel", defaultValue="standard", required=true)
+  private final InfoLevel infolevel = InfoLevel.standard;
 
   /**
-   * @parameter expression="${schemas}"
+   * Schemas to include.
    */
+  @Parameter(property="schemas", defaultValue=InclusionRule.ALL)
   private final String schemas = InclusionRule.ALL;
 
   /**
    * Comma-separated list of table types of
    * TABLE,VIEW,SYSTEM_TABLE,GLOBAL_TEMPORARY,LOCAL_TEMPORARY,ALIAS
-   * 
-   * @parameter expression="${table_types}"
    */
+  @Parameter(property="table_types")
   private String table_types;
 
   /**
@@ -185,9 +160,8 @@ public class SchemaCrawlerMojo
    * form "CATALOGNAME.SCHEMANAME.TABLENAME" - for example,
    * .*\.C.*|.*\.P.* Tables that do not match the pattern are not
    * displayed.
-   * 
-   * @parameter expression="${tables}"
    */
+  @Parameter(property="tables", defaultValue=InclusionRule.ALL)
   private final String tables = InclusionRule.ALL;
 
   /**
@@ -195,9 +169,8 @@ public class SchemaCrawlerMojo
    * form "CATALOGNAME.SCHEMANAME.TABLENAME.COLUMNNAME" - for example,
    * .*\.STREET|.*\.PRICE matches columns named STREET or PRICE in any
    * table Columns that match the pattern are not displayed
-   * 
-   * @parameter expression="${excludecolumns}" alias="excludecolumns"
    */
+  @Parameter(property="excludecolumns", defaultValue=InclusionRule.NONE)
   private final String excludecolumns = InclusionRule.NONE;
 
   /**
@@ -205,17 +178,15 @@ public class SchemaCrawlerMojo
    * form "CATALOGNAME.SCHEMANAME.PROCEDURENAME" - for example,
    * .*\.C.*|.*\.P.* matches any procedures whose names start with C or
    * P Procedures that do not match the pattern are not displayed
-   * 
-   * @parameter expression="${procedures}"
    */
+  @Parameter(property="procedures", defaultValue=InclusionRule.ALL)
   private final String procedures = InclusionRule.ALL;
 
   /**
    * Regular expression to match fully qualified parameter names.
    * Parameters that match the pattern are not displayed
-   * 
-   * @parameter expression="${excludeinout}"
    */
+  @Parameter(property="excludeinout", defaultValue=InclusionRule.NONE)
   private final String excludeinout = InclusionRule.NONE;
 
   /**
@@ -326,8 +297,7 @@ public class SchemaCrawlerMojo
     schemaCrawlerOptions.setAlphabeticalSortForTables(sorttables);
     schemaCrawlerOptions.setAlphabeticalSortForTableColumns(sortcolumns);
     schemaCrawlerOptions.setAlphabeticalSortForProcedureColumns(sortinout);
-    schemaCrawlerOptions.setSchemaInfoLevel(InfoLevel.valueOf(infolevel)
-      .getSchemaInfoLevel());
+    schemaCrawlerOptions.setSchemaInfoLevel(infolevel.getSchemaInfoLevel());
     schemaCrawlerOptions
       .setSchemaInclusionRule(new InclusionRule(schemas, InclusionRule.NONE));
     schemaCrawlerOptions

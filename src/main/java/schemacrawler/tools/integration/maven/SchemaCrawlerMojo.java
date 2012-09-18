@@ -106,7 +106,7 @@ public class SchemaCrawlerMojo
   private String password;
 
   /**
-   * Command.
+   * SchemaCrawler command.
    */
   @Parameter(property = "command", required = true)
   private String command;
@@ -130,7 +130,7 @@ public class SchemaCrawlerMojo
   private boolean sortcolumns;
 
   /**
-   * Sort parameters in a stored routine alphabetically.
+   * Sort parameters in a routine alphabetically.
    */
   @Parameter(property = "sortinout", defaultValue = "false")
   private boolean sortinout;
@@ -175,7 +175,7 @@ public class SchemaCrawlerMojo
 
   /**
    * Regular expression to match fully qualified routine names, in the
-   * form "CATALOGNAME.SCHEMANAME.PROCEDURENAME" - for example,
+   * form "CATALOGNAME.SCHEMANAME.ROUTINENAME" - for example,
    * .*\.C.*|.*\.P.* matches any routines whose names start with C or P
    * Routines that do not match the pattern are not displayed
    */
@@ -188,15 +188,6 @@ public class SchemaCrawlerMojo
    */
   @Parameter(property = "excludeinout", defaultValue = InclusionRule.NONE)
   private String excludeinout;
-
-  { // default values
-    infolevel = InfoLevel.standard.name();
-    schemas = InclusionRule.ALL;
-    tables = InclusionRule.ALL;
-    excludecolumns = InclusionRule.NONE;
-    routines = InclusionRule.ALL;
-    excludeinout = InclusionRule.NONE;
-  }
 
   /**
    * {@inheritDoc}
@@ -231,6 +222,11 @@ public class SchemaCrawlerMojo
     return "schemacrawler";
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.apache.maven.reporting.AbstractMavenReport#executeReport(java.util.Locale)
+   */
   @Override
   protected void executeReport(final Locale locale)
     throws MavenReportException
@@ -260,6 +256,8 @@ public class SchemaCrawlerMojo
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.apache.maven.reporting.AbstractMavenReport#getOutputDirectory()
    */
   @Override
@@ -269,6 +267,8 @@ public class SchemaCrawlerMojo
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.apache.maven.reporting.AbstractMavenReport#getProject()
    */
   @Override
@@ -278,6 +278,8 @@ public class SchemaCrawlerMojo
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.apache.maven.reporting.AbstractMavenReport#getSiteRenderer()
    */
   @Override
@@ -300,7 +302,8 @@ public class SchemaCrawlerMojo
     textOptions.setAlphabeticalSortForTableColumns(sortcolumns);
     textOptions.setAlphabeticalSortForRoutineColumns(sortinout);
 
-    final Config additionalConfiguration = Config.load(config, additionalConfig);
+    final Config additionalConfiguration = Config
+      .load(config, additionalConfig);
     additionalConfiguration.putAll(textOptions.toConfig());
     return additionalConfiguration;
   }
@@ -366,6 +369,7 @@ public class SchemaCrawlerMojo
 
     logger.debug(ObjectToString.toString(executable));
     executable.execute(connectionOptions.getConnection());
+    
     return outputFile;
   }
 

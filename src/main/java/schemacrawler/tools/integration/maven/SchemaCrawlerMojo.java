@@ -32,6 +32,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.doxia.siterenderer.Renderer;
@@ -357,37 +358,19 @@ public class SchemaCrawlerMojo
       }
     }
 
-    if (!Utility.isBlank(schemas))
-    {
-      schemaCrawlerOptions
-        .setSchemaInclusionRule(new InclusionRule(schemas, InclusionRule.NONE));
-    }
+    schemaCrawlerOptions.setSchemaInclusionRule(new InclusionRule(StringUtils
+      .defaultString(schemas, InclusionRule.ALL), InclusionRule.NONE));
+    schemaCrawlerOptions.setTableInclusionRule(new InclusionRule(StringUtils
+      .defaultString(tables, InclusionRule.ALL), InclusionRule.NONE));
+    schemaCrawlerOptions.setRoutineInclusionRule(new InclusionRule(StringUtils
+      .defaultString(routines, InclusionRule.ALL), InclusionRule.NONE));
 
-    if (!Utility.isBlank(tables))
-    {
-      schemaCrawlerOptions
-        .setTableInclusionRule(new InclusionRule(tables, InclusionRule.NONE));
-    }
-
-    if (!Utility.isBlank(routines))
-    {
-      schemaCrawlerOptions
-        .setRoutineInclusionRule(new InclusionRule(routines, InclusionRule.NONE));
-    }
-
-    if (!Utility.isBlank(excludecolumns))
-    {
-      schemaCrawlerOptions
-        .setColumnInclusionRule(new InclusionRule(InclusionRule.ALL,
-                                                  excludecolumns));
-    }
-
-    if (!Utility.isBlank(excludeinout))
-    {
-      schemaCrawlerOptions
-        .setRoutineColumnInclusionRule(new InclusionRule(InclusionRule.ALL,
-                                                         excludeinout));
-    }
+    schemaCrawlerOptions
+      .setColumnInclusionRule(new InclusionRule(InclusionRule.ALL, StringUtils
+        .defaultString(excludecolumns, InclusionRule.NONE)));
+    schemaCrawlerOptions
+      .setColumnInclusionRule(new InclusionRule(InclusionRule.ALL, StringUtils
+        .defaultString(excludeinout, InclusionRule.NONE)));
 
     return schemaCrawlerOptions;
   }

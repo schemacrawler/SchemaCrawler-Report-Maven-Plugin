@@ -42,6 +42,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.reporting.AbstractMavenReport;
 import org.apache.maven.reporting.MavenReportException;
+import org.codehaus.plexus.util.StringUtils;
 
 import schemacrawler.schemacrawler.Config;
 import schemacrawler.schemacrawler.ConnectionOptions;
@@ -343,10 +344,10 @@ public class SchemaCrawlerMojo
       .setRoutineInclusionRule(new InclusionRule(routines, InclusionRule.NONE));
     schemaCrawlerOptions
       .setColumnInclusionRule(new InclusionRule(InclusionRule.ALL,
-                                                excludecolumns));
+                                                StringUtils.defaultString(excludecolumns, InclusionRule.NONE)));
     schemaCrawlerOptions
       .setRoutineColumnInclusionRule(new InclusionRule(InclusionRule.ALL,
-                                                       excludeinout));
+                                                       StringUtils.defaultString(excludeinout, InclusionRule.NONE)));
     return schemaCrawlerOptions;
   }
 

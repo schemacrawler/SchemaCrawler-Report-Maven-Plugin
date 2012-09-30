@@ -326,27 +326,69 @@ public class SchemaCrawlerMojo
     return outputOptions;
   }
 
+  /**
+   * Defensively set SchemaCrawlerOptions.
+   * 
+   * @return SchemaCrawlerOptions
+   */
   private SchemaCrawlerOptions createSchemaCrawlerOptions()
   {
+    final Log logger = getLog();
+
     final SchemaCrawlerOptions schemaCrawlerOptions = new SchemaCrawlerOptions();
+
     if (!Utility.isBlank(table_types))
     {
       schemaCrawlerOptions.setTableTypes(table_types);
     }
-    schemaCrawlerOptions.setSchemaInfoLevel(InfoLevel.valueOf(infolevel)
-      .getSchemaInfoLevel());
-    schemaCrawlerOptions
-      .setSchemaInclusionRule(new InclusionRule(schemas, InclusionRule.NONE));
-    schemaCrawlerOptions
-      .setTableInclusionRule(new InclusionRule(tables, InclusionRule.NONE));
-    schemaCrawlerOptions
-      .setRoutineInclusionRule(new InclusionRule(routines, InclusionRule.NONE));
-    schemaCrawlerOptions
-      .setColumnInclusionRule(new InclusionRule(InclusionRule.ALL,
-                                                excludecolumns));
-    schemaCrawlerOptions
-      .setRoutineColumnInclusionRule(new InclusionRule(InclusionRule.ALL,
-                                                       excludeinout));
+
+    if (!Utility.isBlank(infolevel))
+    {
+      try
+      {
+        schemaCrawlerOptions.setSchemaInfoLevel(InfoLevel.valueOf(infolevel)
+          .getSchemaInfoLevel());
+      }
+      catch (Exception e)
+      {
+        logger.info("Unknown infolevel - using 'standard': " + infolevel);
+        schemaCrawlerOptions.setSchemaInfoLevel(InfoLevel.standard
+          .getSchemaInfoLevel());
+      }
+    }
+
+    if (!Utility.isBlank(schemas))
+    {
+      schemaCrawlerOptions
+        .setSchemaInclusionRule(new InclusionRule(schemas, InclusionRule.NONE));
+    }
+
+    if (!Utility.isBlank(tables))
+    {
+      schemaCrawlerOptions
+        .setTableInclusionRule(new InclusionRule(tables, InclusionRule.NONE));
+    }
+
+    if (!Utility.isBlank(routines))
+    {
+      schemaCrawlerOptions
+        .setRoutineInclusionRule(new InclusionRule(routines, InclusionRule.NONE));
+    }
+
+    if (!Utility.isBlank(excludecolumns))
+    {
+      schemaCrawlerOptions
+        .setColumnInclusionRule(new InclusionRule(InclusionRule.ALL,
+                                                  excludecolumns));
+    }
+
+    if (!Utility.isBlank(excludeinout))
+    {
+      schemaCrawlerOptions
+        .setRoutineColumnInclusionRule(new InclusionRule(InclusionRule.ALL,
+                                                         excludeinout));
+    }
+
     return schemaCrawlerOptions;
   }
 
@@ -369,7 +411,7 @@ public class SchemaCrawlerMojo
 
     logger.debug(ObjectToString.toString(executable));
     executable.execute(connectionOptions.getConnection());
-    
+
     return outputFile;
   }
 

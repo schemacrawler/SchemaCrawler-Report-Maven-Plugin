@@ -82,9 +82,8 @@
     <maven.api.version>2.2.1</maven.api.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <schemacrawler.version>9.0</schemacrawler.version>
+    <schemacrawler.version>9.1</schemacrawler.version>
     <!-- Properties for Site documentation (may not use period)... -->
-    <SchemacrawlerMavenPluginVersion>${project.version}</SchemacrawlerMavenPluginVersion>
     <SchemacrawlerVersion>${schemacrawler.version}</SchemacrawlerVersion>
   </properties>
   <build>

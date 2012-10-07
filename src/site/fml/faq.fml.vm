@@ -39,7 +39,7 @@
 <plugin>
   <groupId>net.sourceforge.schemacrawler</groupId>
   <artifactId>schemacrawler-maven-plugin</artifactId>
-  <version>${SchemacrawlerMavenPluginVersion}</version>
+  <version>${project.version}</version>
   <dependencies>
     <dependency>
       <groupId>net.sourceforge.schemacrawler</groupId>

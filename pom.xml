@@ -98,7 +98,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-assembly-plugin</artifactId>
-          <version>2.3</version>
+          <version>2.4</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -108,12 +108,12 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>2.5.1</version>
+          <version>3.0</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-dependency-plugin</artifactId>
-          <version>2.5.1</version>
+          <version>2.6</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -123,7 +123,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-enforcer-plugin</artifactId>
-          <version>1.1.1</version>
+          <version>1.2</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -138,7 +138,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-invoker-plugin</artifactId>
-          <version>1.7</version>
+          <version>1.8</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -153,7 +153,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-plugin-plugin</artifactId>
-          <version>3.1</version>
+          <version>3.2</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -173,7 +173,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-scm-plugin</artifactId>
-          <version>1.8</version>
+          <version>1.8.1</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -183,7 +183,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-source-plugin</artifactId>
-          <version>2.2</version>
+          <version>2.2.1</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -266,6 +266,7 @@
                   <link>http://maven.apache.org/ref/3.0.4/maven-core/apidocs/</link>
                 </links>
                 <linksource>true</linksource>
+<!--
                 <tagletArtifacts>
                   <tagletArtifact>
                     <groupId>org.apache.maven.plugin-tools</groupId>
@@ -278,6 +279,7 @@
                     <version>1.5.5</version>
                   </tagletArtifact>
                 </tagletArtifacts>
+-->
               </configuration>
             </plugin>
             <plugin>
@@ -288,12 +290,12 @@
             <plugin>
               <groupId>org.apache.maven.plugins</groupId>
               <artifactId>maven-invoker-plugin</artifactId>
-              <version>1.7</version>
+              <version>1.8</version>
             </plugin>
             <plugin>
               <groupId>org.apache.maven.plugins</groupId>
               <artifactId>maven-plugin-plugin</artifactId>
-              <version>3.1</version>
+              <version>3.2</version>
             </plugin>
             <plugin>
               <groupId>org.apache.maven.plugins</groupId>
@@ -322,7 +324,7 @@
             <plugin>
               <groupId>org.apache.maven.plugins</groupId>
               <artifactId>maven-project-info-reports-plugin</artifactId>
-              <version>2.5.1</version>
+              <version>2.6</version>
             </plugin>
             <plugin>
               <groupId>org.codehaus.mojo</groupId>

@@ -9,7 +9,7 @@
   <groupId>net.sourceforge.schemacrawler</groupId>
   <artifactId>schemacrawler-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
-  <version>9.1-SNAPSHOT</version>
+  <version>9.4-SNAPSHOT</version>
   <name>SchemaCrawler Maven Plugin</name>
   <description>SchemaCrawler is an open-source Java API that makes working with database metadata as easy as working with plain old Java objects.  SchemaCrawler is also a database schema discovery and comprehension, and schema documentation tool. You can search for database schema objects using regular expressions, and output the schema and data in a readable text format. The output is designed to be diff-ed against other database schemas.</description>
   <url>http://mvn-schemacrwlr.sourceforge.net/${project.artifactId}/${project.version}/</url>
@@ -82,7 +82,7 @@
     <maven.api.version>2.2.1</maven.api.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <schemacrawler.version>9.1</schemacrawler.version>
+    <schemacrawler.version>9.4</schemacrawler.version>
     <!-- Properties for Site documentation (may not use period)... -->
     <SchemacrawlerVersion>${schemacrawler.version}</SchemacrawlerVersion>
   </properties>

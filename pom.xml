@@ -52,12 +52,6 @@
       <artifactId>maven-plugin-annotations</artifactId>
       <version>3.2</version>
     </dependency>
-    <!-- The generated help mojo has a dependency to plexus-utils... -->
-    <dependency>
-      <groupId>org.codehaus.plexus</groupId>
-      <artifactId>plexus-utils</artifactId>
-      <version>3.0.10</version>
-    </dependency>
     <!-- SchemaCrawler Maven reporting plugin -->
     <dependency>
       <groupId>org.apache.maven.reporting</groupId>

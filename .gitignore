@@ -7,3 +7,4 @@ target/
 *.launch
 /release.properties
 /LICENSE.txt
+pom.xml.releaseBackup

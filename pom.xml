@@ -402,7 +402,7 @@
     <connection>scm:git:git://git.code.sf.net/p/mvn-schemacrwlr/git</connection>
     <developerConnection>scm:git:ssh://git.code.sf.net/p/mvn-schemacrwlr/git</developerConnection>
     <url>https://sourceforge.net/p/mvn-schemacrwlr/git/</url>
-    <tag>schemacrawler-maven-plugin-9.4</tag>
+    <tag>schemacrawler-maven-plugin-9.5</tag>
   </scm>
   <issueManagement>
     <system>SourceForge</system>

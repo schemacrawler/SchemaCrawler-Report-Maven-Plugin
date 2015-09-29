@@ -10,9 +10,7 @@
   <artifactId>schemacrawler-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
   <version>14.03.03</version>
-  <name>SchemaCrawler Maven Plugin</name>
-  <description>SchemaCrawler is an open-source Java API that makes working with database metadata as easy as working with plain old Java objects.  SchemaCrawler is also a database schema discovery and comprehension, and schema documentation tool. You can search for database schema objects using regular expressions, and output the schema and data in a readable text format. The output is designed to be diff-ed against other database schemas.</description>
-  <url>http://mvn-schemacrwlr.sourceforge.net/${project.artifactId}/${project.version}/</url>
+  <name>SchemaCrawler Report - Maven Plugin</name>
   <inceptionYear>2011</inceptionYear>
   <licenses>
     <license>
@@ -252,13 +250,7 @@
                   <link>http://maven.apache.org/ref/3.0.4/maven-plugin-api/apidocs/</link>
                   <link>http://maven.apache.org/ref/3.0.4/maven-core/apidocs/</link>
                 </links>
-                <linksource>true</linksource>
               </configuration>
-            </plugin>
-            <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-jxr-plugin</artifactId>
-              <version>2.3</version>
             </plugin>
             <plugin>
               <groupId>org.apache.maven.plugins</groupId>
@@ -269,11 +261,6 @@
               <groupId>org.apache.maven.plugins</groupId>
               <artifactId>maven-plugin-plugin</artifactId>
               <version>3.4</version>
-            </plugin>
-            <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-project-info-reports-plugin</artifactId>
-              <version>2.6</version>
             </plugin>
             <plugin>
               <groupId>org.codehaus.mojo</groupId>
@@ -303,35 +290,6 @@
           </dependency>
         </dependencies>
       </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>license-maven-plugin</artifactId>
-        <version>1.8</version>
-        <configuration>
-          <licenseName>lgpl_v3</licenseName>
-        </configuration>
-        <executions>
-          <execution>
-            <id>update-file-header</id>
-            <goals>
-              <goal>update-file-header</goal>
-            </goals>
-            <phase>process-sources</phase>
-          </execution>
-          <execution>
-            <id>update-project-license</id>
-            <goals>
-              <goal>update-project-license</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>download-licenses</id>
-            <goals>
-              <goal>download-licenses</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
       <!-- Create a sample database for sample reports... -->
       <plugin>
         <groupId>org.liquibase</groupId>
@@ -355,21 +313,4 @@
       </plugin>
     </plugins>
   </build>
-  <scm>
-    <connection>scm:git:git://git.code.sf.net/p/mvn-schemacrwlr/git</connection>
-    <developerConnection>scm:git:ssh://git.code.sf.net/p/mvn-schemacrwlr/git</developerConnection>
-    <url>https://sourceforge.net/p/mvn-schemacrwlr/git/</url>
-    <tag>schemacrawler-maven-plugin-9.5</tag>
-  </scm>
-  <issueManagement>
-    <system>SourceForge</system>
-    <url>https://sourceforge.net/p/mvn-schemacrwlr/tickets/</url>
-  </issueManagement>
-  <distributionManagement>
-    <site>
-      <id>sourceforge.net</id>
-      <name>SchemaCrawler Maven Plugin Website</name>
-      <url>scp://shell.sourceforge.net/home/project-web/mvn-schemacrwlr/htdocs/${project.artifactId}/${project.version}</url>
-    </site>
-  </distributionManagement>
 </project>

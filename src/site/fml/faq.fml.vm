@@ -26,23 +26,23 @@
   <part id="Versions">
     <title>Versions</title>
     <faq id="version-schemacrawler">
-      <question>What version of <em>schemacrawler.jar</em> is used by the plugin?</question>
+      <question>What version of SchemaCrawler is used by the plugin?</question>
       <answer>
         <p>Please refer to the <a href="dependencies.html">Project Dependencies</a> page.</p>
       </answer>
     </faq>
     <faq id="version-override">
-      <question>Can the version of <em>schemacrawler.jar</em> be overridden?</question>
+      <question>Can the version of SchemaCrawler used by the plugin be overridden?</question>
       <answer>
         <p>Yes.  Maven 2.0.9 introduced the ability to override a dependency used by a plugin.  For example:</p>
         <source><![CDATA[
 <plugin>
-  <groupId>net.sourceforge.schemacrawler</groupId>
+  <groupId>us.fatehi</groupId>
   <artifactId>schemacrawler-maven-plugin</artifactId>
   <version>${project.version}</version>
   <dependencies>
     <dependency>
-      <groupId>net.sourceforge.schemacrawler</groupId>
+      <groupId>us.fatehi</groupId>
       <artifactId>schemacrawler</artifactId>
       <version>${SchemacrawlerVersion}.1</version>
     </dependency>
@@ -50,7 +50,7 @@
 </plugin>
 ]]>
         </source>
-        <p>The above example uses a newer version of the <em>schemacrawler.jar</em> than what is
+        <p>The above example uses a newer version of SchemaCrawler than what is
         defined for the plugin.  But please note that the different version needs to have a
         compatible interface; using a different version is not guaranteed to work correctly, so do
         this at your own risk.</p>

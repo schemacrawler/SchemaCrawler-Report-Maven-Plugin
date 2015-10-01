@@ -3,6 +3,6 @@
 
 # ![SchemaCrawler](https://github.com/sualeh/SchemaCrawler/blob/master/schemacrawler-site/src/site/resources/images/schemacrawler_logo.png?raw=true) SchemaCrawler Report Maven Plugin
 
-**[See SchemaCrawler website](http://www.SchemaCrawler.com/)** 
+**[See SchemaCrawler Report Maven Plugin documentation](sualeh.github.io/SchemaCrawler-Report-Maven-Plugin)**
 
-SchemaCrawler is a free database schema discovery and comprehension tool. SchemaCrawler has a good mix of useful features for data governance. The SchemaCrawler Report Maven Plugin allows you to integrate a SchemaCrawler report of your database within the Maven-generated website for your project.
+[SchemaCrawler](http://www.SchemaCrawler.com/) is a free database schema discovery and comprehension tool. SchemaCrawler has a good mix of useful features for data governance. The SchemaCrawler Report Maven Plugin allows you to integrate a SchemaCrawler report of your database within the Maven-generated website for your project.

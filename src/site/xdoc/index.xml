@@ -9,10 +9,7 @@
       <subsection name="">
         <p>SchemaCrawler is a free database schema discovery and comprehension tool. SchemaCrawler has a good mix of useful features for data governance.</p>
         <p>The SchemaCrawler Report Maven Plugin provides a Maven plugin to allow you to create database documentation for your project's Maven-generated website, using SchemaCrawler.</p>
-      </subsection>
-      <subsection name="SchemaCrawler Website">
-        <p>SchemaCrawler information is at <a href=""http://www.schemacrawler.com">"http://www.schemacrawler.com</a>.</p>
-      </subsection>      
+      </subsection>    
     </section>
   </body>
 </document>

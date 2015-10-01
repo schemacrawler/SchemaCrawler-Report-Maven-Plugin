@@ -286,6 +286,7 @@
               <configuration>
                 <command>details</command>
                 <infolevel>maximum</infolevel>
+                <outputformat>html</outputformat>
                 <driver>org.hsqldb.jdbc.JDBCDriver</driver>
                 <url>jdbc:hsqldb:file:${project.build.directory}/hsqldb/sample;shutdown=true</url>
                 <user>sa</user>

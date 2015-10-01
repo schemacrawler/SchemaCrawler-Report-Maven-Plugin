@@ -20,7 +20,8 @@
 package schemacrawler.tools.integration.maven;
 
 
-import static sf.util.Utility.isBlank;
+import static org.apache.commons.lang.StringUtils.defaultString;
+import static org.apache.commons.lang.StringUtils.isBlank;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -28,14 +29,16 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Consumer;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.doxia.siterenderer.Renderer;
@@ -54,10 +57,11 @@ import schemacrawler.schemacrawler.SchemaCrawlerException;
 import schemacrawler.schemacrawler.SchemaCrawlerOptions;
 import schemacrawler.tools.executable.Executable;
 import schemacrawler.tools.executable.SchemaCrawlerExecutable;
+import schemacrawler.tools.integration.graph.GraphOutputFormat;
 import schemacrawler.tools.options.InfoLevel;
+import schemacrawler.tools.options.OutputFormat;
 import schemacrawler.tools.options.OutputOptions;
 import schemacrawler.tools.options.TextOutputFormat;
-import schemacrawler.tools.text.schema.SchemaTextOptions;
 import schemacrawler.tools.text.schema.SchemaTextOptionsBuilder;
 import sf.util.ObjectToString;
 
@@ -139,6 +143,58 @@ public class SchemaCrawlerMojo
    */
   @Parameter(property = "sortcolumns", defaultValue = "false")
   private boolean sortcolumns;
+
+  /**
+   * Regular expression to match fully qualified synonym names, in the form
+   * "CATALOGNAME.SCHEMANAME.SYNONYMNAME" - for example, .*\.C.*|.*\.P.*
+   * Synonyms that do not match the pattern are not displayed.
+   */
+  @Parameter(property = "synonyms", defaultValue = INCLUDE_ALL)
+  private String synonyms;
+
+  /**
+   * Regular expression to match fully qualified sequence names, in the form
+   * "CATALOGNAME.SCHEMANAME.SEQUENCENAME" - for example, .*\.C.*|.*\.P.*
+   * Sequences that do not match the pattern are not displayed.
+   */
+  @Parameter(property = "sequences", defaultValue = INCLUDE_ALL)
+  private String sequences;
+
+  /**
+   * Whether to hide tables with no data.
+   */
+  @Parameter(property = "hideemptytables", defaultValue = "false")
+  private boolean hideemptytables;
+
+  /**
+   * Title for the SchemaCrawler Report.
+   */
+  @Parameter(property = "title", defaultValue = "SchemaCrawler Report")
+  private String title;
+
+  /**
+   * Whether to hide additional database information.
+   */
+  @Parameter(property = "noinfo", defaultValue = "true")
+  private boolean noinfo;
+
+  /**
+   * Whether to show table and column remarks.
+   */
+  @Parameter(property = "noremarks", defaultValue = "false")
+  private boolean noremarks;
+
+  /**
+   * Whether to show portable database object names.
+   */
+  @Parameter(property = "portablenames", defaultValue = "false")
+  private boolean portablenames;
+
+  /**
+   * Output format.
+   */
+  @Parameter(property = "outputformat", defaultValue = "html")
+  private String outputformat;
 
   /**
    * Sort parameters in a routine alphabetically.
@@ -250,9 +306,38 @@ public class SchemaCrawlerMojo
       final Sink sink = getSink();
       logger.info(sink.getClass().getName());
 
-      sink.comment("BEGIN SchemaCrawler Report");
       final Path outputFile = executeSchemaCrawler();
-      Files.lines(outputFile).forEach(line -> sink.rawText(line));
+
+      final Consumer<? super String> outputLine = line -> {
+        sink.rawText(line);
+        sink.rawText("\n");
+        sink.flush();
+      };
+
+      final OutputFormat outputFormat = getOutputFormat();
+
+      sink.comment("BEGIN SchemaCrawler Report");
+      if (outputFormat == TextOutputFormat.html
+          || outputFormat == GraphOutputFormat.htmlx)
+      {
+        Files.lines(outputFile).forEach(outputLine);
+      }
+      else if (outputFormat instanceof TextOutputFormat)
+      {
+        sink.rawText("<pre>");
+        Files.lines(outputFile).forEach(outputLine);
+        sink.rawText("</pre>");
+      }
+      else if (outputFormat instanceof GraphOutputFormat)
+      {
+        Path graphFile = Paths.get(getReportOutputDirectory().getAbsolutePath(),
+                                   "schemacrawler." + outputFormat.getFormat());
+        Files.move(outputFile, graphFile, StandardCopyOption.REPLACE_EXISTING);
+
+        sink.figure();
+        sink.figureGraphics(graphFile.getFileName().toString());
+        sink.figure_();
+      }
       sink.comment("END SchemaCrawler Report");
 
       sink.flush();
@@ -264,6 +349,28 @@ public class SchemaCrawlerMojo
     }
   }
 
+  private OutputFormat getOutputFormat()
+  {
+    final OutputFormat outputFormat;
+    if (isBlank(outputformat))
+    {
+      outputFormat = TextOutputFormat.html;
+    }
+    else if (TextOutputFormat.isTextOutputFormat(outputformat))
+    {
+      outputFormat = TextOutputFormat.fromFormat(outputformat);
+    }
+    else if (GraphOutputFormat.isGraphOutputFormat(outputformat))
+    {
+      outputFormat = GraphOutputFormat.fromFormat(outputformat);
+    }
+    else
+    {
+      outputFormat = TextOutputFormat.html;
+    }
+    return outputFormat;
+  }
+
   /**
    * {@inheritDoc}
    *
@@ -272,7 +379,7 @@ public class SchemaCrawlerMojo
   @Override
   protected String getOutputDirectory()
   {
-    return null; // Unused in the Maven API
+    return null; // Unused for Maven reports that are part of a project
   }
 
   /**
@@ -294,7 +401,7 @@ public class SchemaCrawlerMojo
   @Override
   protected Renderer getSiteRenderer()
   {
-    return null; // Unused in the Maven API
+    return null; // Unused for Maven reports that are part of a project
   }
 
   /**
@@ -304,15 +411,7 @@ public class SchemaCrawlerMojo
    */
   private Config createAdditionalConfiguration()
   {
-    final SchemaTextOptions textOptions = new SchemaTextOptions();
-    textOptions.setNoHeader(true);
-    textOptions.setNoFooter(true);
-    textOptions.setAlphabeticalSortForTables(sorttables);
-    textOptions.setAlphabeticalSortForTableColumns(sortcolumns);
-    textOptions.setAlphabeticalSortForRoutineColumns(sortinout);
-    final Config textOptionsConfig = new SchemaTextOptionsBuilder(textOptions)
-      .toConfig();
-
+    final Config textOptionsConfig = createSchemaTextOptions();
     try
     {
       final Config additionalConfiguration = Config.load(config,
@@ -350,31 +449,9 @@ public class SchemaCrawlerMojo
   private OutputOptions createOutputOptions(final Path outputFile)
   {
     final OutputOptions outputOptions = new OutputOptions();
-    outputOptions.setOutputFormatValue(TextOutputFormat.html.name());
+    outputOptions.setOutputFormatValue(getOutputFormat().getFormat());
     outputOptions.setOutputFile(outputFile);
     return outputOptions;
-  }
-
-  private Collection<String> splitTableTypes(final String tableTypesString)
-  {
-    final Collection<String> tableTypes;
-    if (tableTypesString != null)
-    {
-      tableTypes = new HashSet<>();
-      final String[] tableTypeStrings = tableTypesString.split(",");
-      if (tableTypeStrings != null && tableTypeStrings.length > 0)
-      {
-        for (final String tableTypeString: tableTypeStrings)
-        {
-          tableTypes.add(tableTypeString.trim());
-        }
-      }
-    }
-    else
-    {
-      tableTypes = null;
-    }
-    return tableTypes;
   }
 
   /**
@@ -409,23 +486,76 @@ public class SchemaCrawlerMojo
     }
 
     schemaCrawlerOptions
-      .setSchemaInclusionRule(new RegularExpressionRule(StringUtils
-        .defaultString(schemas, INCLUDE_ALL), INCLUDE_NONE));
+      .setSchemaInclusionRule(new RegularExpressionRule(defaultString(schemas,
+                                                                      INCLUDE_ALL),
+                                                        INCLUDE_NONE));
     schemaCrawlerOptions
-      .setTableInclusionRule(new RegularExpressionRule(StringUtils
-        .defaultString(tables, INCLUDE_ALL), INCLUDE_NONE));
+      .setSynonymInclusionRule(new RegularExpressionRule(defaultString(synonyms,
+                                                                       INCLUDE_ALL),
+                                                         INCLUDE_NONE));
     schemaCrawlerOptions
-      .setRoutineInclusionRule(new RegularExpressionRule(StringUtils
-        .defaultString(routines, INCLUDE_ALL), INCLUDE_NONE));
+      .setSequenceInclusionRule(new RegularExpressionRule(defaultString(sequences,
+                                                                        INCLUDE_ALL),
+                                                          INCLUDE_NONE));
+    schemaCrawlerOptions
+      .setTableInclusionRule(new RegularExpressionRule(defaultString(tables,
+                                                                     INCLUDE_ALL),
+                                                       INCLUDE_NONE));
+    schemaCrawlerOptions
+      .setRoutineInclusionRule(new RegularExpressionRule(defaultString(routines,
+                                                                       INCLUDE_ALL),
+                                                         INCLUDE_NONE));
 
     schemaCrawlerOptions
-      .setColumnInclusionRule(new RegularExpressionRule(INCLUDE_ALL, StringUtils
-        .defaultString(excludecolumns, INCLUDE_NONE)));
+      .setColumnInclusionRule(new RegularExpressionRule(INCLUDE_ALL,
+                                                        defaultString(excludecolumns,
+                                                                      INCLUDE_NONE)));
     schemaCrawlerOptions
-      .setColumnInclusionRule(new RegularExpressionRule(INCLUDE_ALL, StringUtils
-        .defaultString(excludeinout, INCLUDE_NONE)));
+      .setColumnInclusionRule(new RegularExpressionRule(INCLUDE_ALL,
+                                                        defaultString(excludeinout,
+                                                                      INCLUDE_NONE)));
+
+    schemaCrawlerOptions.setHideEmptyTables(hideemptytables);
+    schemaCrawlerOptions.setTitle(title);
 
     return schemaCrawlerOptions;
+  }
+
+  private Config createSchemaTextOptions()
+  {
+    final SchemaTextOptionsBuilder textOptionsBuilder = new SchemaTextOptionsBuilder();
+
+    textOptionsBuilder.hideHeader();
+    textOptionsBuilder.hideFooter();
+
+    if (noinfo)
+    {
+      textOptionsBuilder.hideInfo();
+    }
+    if (noremarks)
+    {
+      textOptionsBuilder.hideRemarks();
+    }
+    if (portablenames)
+    {
+      textOptionsBuilder.portableNames();
+    }
+
+    if (sorttables)
+    {
+      textOptionsBuilder.sortTables();
+    }
+    if (sortcolumns)
+    {
+      textOptionsBuilder.sortTableColumns();
+    }
+    if (sortinout)
+    {
+      textOptionsBuilder.sortInOut();
+    }
+
+    final Config textOptionsConfig = textOptionsBuilder.toConfig();
+    return textOptionsConfig;
   }
 
   private Path executeSchemaCrawler()
@@ -437,7 +567,7 @@ public class SchemaCrawlerMojo
     final ConnectionOptions connectionOptions = createConnectionOptions();
     final Config additionalConfiguration = createAdditionalConfiguration();
     final Path outputFile = Files.createTempFile("schemacrawler.report.",
-                                                 ".html");
+                                                 ".data");
     final OutputOptions outputOptions = createOutputOptions(outputFile);
 
     final Executable executable = new SchemaCrawlerExecutable(command);
@@ -499,6 +629,28 @@ public class SchemaCrawlerMojo
     {
       throw new MavenReportException("Error fixing classpath", e);
     }
+  }
+
+  private Collection<String> splitTableTypes(final String tableTypesString)
+  {
+    final Collection<String> tableTypes;
+    if (tableTypesString != null)
+    {
+      tableTypes = new HashSet<>();
+      final String[] tableTypeStrings = tableTypesString.split(",");
+      if (tableTypeStrings != null && tableTypeStrings.length > 0)
+      {
+        for (final String tableTypeString: tableTypeStrings)
+        {
+          tableTypes.add(tableTypeString.trim());
+        }
+      }
+    }
+    else
+    {
+      tableTypes = null;
+    }
+    return tableTypes;
   }
 
 }

@@ -39,6 +39,5 @@
       <item name="Example" href="schemacrawler.html" />
       <item name="FAQ" href="faq.html" />
     </menu>
-    <menu ref="reports" />
   </body>
 </project>

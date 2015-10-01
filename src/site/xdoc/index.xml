@@ -1,0 +1,15 @@
+<!DOCTYPE document PUBLIC "-//Apache Software Foundation//DTD XDOC 1.0//EN"
+  "http://maven.apache.org/dtd/xdoc_1_0.dtd">
+<document>
+  <properties>
+    <title>SchemaCrawler Report Maven Plugin</title>
+  </properties>
+  <body>
+    <section name="SchemaCrawler Report Maven Plugin">
+      <subsection name="Example Project pom.xml">
+        <p>[SchemaCrawler](http://www.schemacrawler.com) is a free database schema discovery and comprehension tool. SchemaCrawler has a good mix of useful features for data governance.</p>
+        <p>The SchemaCrawler Report Maven Plugin provides a Maven plugin to allow you to create database documentation for your project's Maven-generated website, using SchemaCrawler.</p>
+      </subsection>
+    </section>
+  </body>
+</document>

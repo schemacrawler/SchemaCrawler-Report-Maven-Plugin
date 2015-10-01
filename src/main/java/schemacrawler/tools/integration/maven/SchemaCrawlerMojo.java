@@ -21,14 +21,12 @@ package schemacrawler.tools.integration.maven;
 
 
 import static sf.util.Utility.isBlank;
-import static sf.util.Utility.readFully;
 
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -74,7 +72,7 @@ public class SchemaCrawlerMojo
   private static final String INCLUDE_ALL = ".*";
   private static final String INCLUDE_NONE = "";
 
-  @Parameter(defaultValue = "${project}", readonly = true)
+  @Parameter(defaultValue = "${project}", required = true, readonly = true)
   private MavenProject project;
 
   /**
@@ -249,14 +247,13 @@ public class SchemaCrawlerMojo
     {
       fixClassPath();
 
-      final File outputFile = executeSchemaCrawler();
-
       final Sink sink = getSink();
       logger.info(sink.getClass().getName());
 
-      sink
-        .rawText("<link rel=\"stylesheet\" href=\"./css/schemacrawler-output.css\" type=\"text/css\"/>\n");
-      sink.rawText(readFully(new FileReader(outputFile)));
+      sink.comment("BEGIN SchemaCrawler Report");
+      final Path outputFile = executeSchemaCrawler();
+      Files.lines(outputFile).forEach(line -> sink.rawText(line));
+      sink.comment("END SchemaCrawler Report");
 
       sink.flush();
     }
@@ -431,7 +428,7 @@ public class SchemaCrawlerMojo
     return schemaCrawlerOptions;
   }
 
-  private File executeSchemaCrawler()
+  private Path executeSchemaCrawler()
     throws Exception
   {
     final Log logger = getLog();
@@ -439,10 +436,9 @@ public class SchemaCrawlerMojo
     final SchemaCrawlerOptions schemaCrawlerOptions = createSchemaCrawlerOptions();
     final ConnectionOptions connectionOptions = createConnectionOptions();
     final Config additionalConfiguration = createAdditionalConfiguration();
-    final File outputFile = File.createTempFile("schemacrawler.report.",
-                                                ".html");
-    final OutputOptions outputOptions = createOutputOptions(outputFile
-      .toPath());
+    final Path outputFile = Files.createTempFile("schemacrawler.report.",
+                                                 ".html");
+    final OutputOptions outputOptions = createOutputOptions(outputFile);
 
     final Executable executable = new SchemaCrawlerExecutable(command);
     executable.setOutputOptions(outputOptions);

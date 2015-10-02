@@ -12,4 +12,4 @@ addons:
     packages:
       - graphviz
 install:
-  - mvn -Dcomplete install
+  - mvn install

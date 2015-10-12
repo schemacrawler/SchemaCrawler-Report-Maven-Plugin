@@ -31,6 +31,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -82,36 +83,31 @@ public class SchemaCrawlerMojo
   /**
    * Config file.
    */
-  @Parameter(property = "config",
-      defaultValue = "schemacrawler.config.properties", required = true)
+  @Parameter(property = "config", defaultValue = "schemacrawler.config.properties", required = true)
   private String config;
 
   /**
    * Additional config file.
    */
-  @Parameter(property = "additional-config",
-      defaultValue = "schemacrawler.additional.config.properties")
+  @Parameter(property = "additional-config", defaultValue = "schemacrawler.additional.config.properties")
   private String additionalConfig;
 
   /**
    * JDBC driver class name.
    */
-  @Parameter(property = "driver", defaultValue = "${schemacrawler.driver}",
-      required = true)
+  @Parameter(property = "driver", defaultValue = "${schemacrawler.driver}", required = true)
   private String driver;
 
   /**
    * Database connection string.
    */
-  @Parameter(property = "url", defaultValue = "${schemacrawler.url}",
-      required = true)
+  @Parameter(property = "url", defaultValue = "${schemacrawler.url}", required = true)
   private String url;
 
   /**
    * Database connection user name.
    */
-  @Parameter(property = "user", defaultValue = "${schemacrawler.user}",
-      required = true)
+  @Parameter(property = "user", defaultValue = "${schemacrawler.user}", required = true)
   private String user;
 
   /**
@@ -145,17 +141,19 @@ public class SchemaCrawlerMojo
   private boolean sortcolumns;
 
   /**
-   * Regular expression to match fully qualified synonym names, in the form
-   * "CATALOGNAME.SCHEMANAME.SYNONYMNAME" - for example, .*\.C.*|.*\.P.*
-   * Synonyms that do not match the pattern are not displayed.
+   * Regular expression to match fully qualified synonym names, in the
+   * form "CATALOGNAME.SCHEMANAME.SYNONYMNAME" - for example,
+   * .*\.C.*|.*\.P.* Synonyms that do not match the pattern are not
+   * displayed.
    */
   @Parameter(property = "synonyms", defaultValue = INCLUDE_ALL)
   private String synonyms;
 
   /**
-   * Regular expression to match fully qualified sequence names, in the form
-   * "CATALOGNAME.SCHEMANAME.SEQUENCENAME" - for example, .*\.C.*|.*\.P.*
-   * Sequences that do not match the pattern are not displayed.
+   * Regular expression to match fully qualified sequence names, in the
+   * form "CATALOGNAME.SCHEMANAME.SEQUENCENAME" - for example,
+   * .*\.C.*|.*\.P.* Sequences that do not match the pattern are not
+   * displayed.
    */
   @Parameter(property = "sequences", defaultValue = INCLUDE_ALL)
   private String sequences;
@@ -203,8 +201,8 @@ public class SchemaCrawlerMojo
   private boolean sortinout;
 
   /**
-   * The info level determines the amount of database metadata retrieved, and
-   * also determines the time taken to crawl the schema.
+   * The info level determines the amount of database metadata
+   * retrieved, and also determines the time taken to crawl the schema.
    */
   @Parameter(property = "infolevel", defaultValue = "standard", required = true)
   private String infolevel;
@@ -223,34 +221,35 @@ public class SchemaCrawlerMojo
   private String table_types;
 
   /**
-   * Regular expression to match fully qualified table names, in the form
-   * "CATALOGNAME.SCHEMANAME.TABLENAME" - for example, .*\.C.*|.*\.P.* Tables
-   * that do not match the pattern are not displayed.
+   * Regular expression to match fully qualified table names, in the
+   * form "CATALOGNAME.SCHEMANAME.TABLENAME" - for example,
+   * .*\.C.*|.*\.P.* Tables that do not match the pattern are not
+   * displayed.
    */
   @Parameter(property = "tables", defaultValue = INCLUDE_ALL)
   private String tables;
 
   /**
-   * Regular expression to match fully qualified column names, in the form
-   * "CATALOGNAME.SCHEMANAME.TABLENAME.COLUMNNAME" - for example,
-   * .*\.STREET|.*\.PRICE matches columns named STREET or PRICE in any table
-   * Columns that match the pattern are not displayed
+   * Regular expression to match fully qualified column names, in the
+   * form "CATALOGNAME.SCHEMANAME.TABLENAME.COLUMNNAME" - for example,
+   * .*\.STREET|.*\.PRICE matches columns named STREET or PRICE in any
+   * table Columns that match the pattern are not displayed
    */
   @Parameter(property = "excludecolumns", defaultValue = INCLUDE_NONE)
   private String excludecolumns;
 
   /**
-   * Regular expression to match fully qualified routine names, in the form
-   * "CATALOGNAME.SCHEMANAME.ROUTINENAME" - for example, .*\.C.*|.*\.P.* matches
-   * any routines whose names start with C or P Routines that do not match the
-   * pattern are not displayed
+   * Regular expression to match fully qualified routine names, in the
+   * form "CATALOGNAME.SCHEMANAME.ROUTINENAME" - for example,
+   * .*\.C.*|.*\.P.* matches any routines whose names start with C or P
+   * Routines that do not match the pattern are not displayed
    */
   @Parameter(property = "routines", defaultValue = INCLUDE_ALL)
   private String routines;
 
   /**
-   * Regular expression to match fully qualified parameter names. Parameters
-   * that match the pattern are not displayed
+   * Regular expression to match fully qualified parameter names.
+   * Parameters that match the pattern are not displayed
    */
   @Parameter(property = "excludeinout", defaultValue = INCLUDE_NONE)
   private String excludeinout;
@@ -330,8 +329,9 @@ public class SchemaCrawlerMojo
       }
       else if (outputFormat instanceof GraphOutputFormat)
       {
-        Path graphFile = Paths.get(getReportOutputDirectory().getAbsolutePath(),
-                                   "schemacrawler." + outputFormat.getFormat());
+        final Path graphFile = Paths
+          .get(getReportOutputDirectory().getAbsolutePath(),
+               "schemacrawler." + outputFormat.getFormat());
         Files.move(outputFile, graphFile, StandardCopyOption.REPLACE_EXISTING);
 
         sink.figure();
@@ -347,28 +347,6 @@ public class SchemaCrawlerMojo
       throw new MavenReportException("Error executing SchemaCrawler command "
                                      + command, e);
     }
-  }
-
-  private OutputFormat getOutputFormat()
-  {
-    final OutputFormat outputFormat;
-    if (isBlank(outputformat))
-    {
-      outputFormat = TextOutputFormat.html;
-    }
-    else if (TextOutputFormat.isTextOutputFormat(outputformat))
-    {
-      outputFormat = TextOutputFormat.fromFormat(outputformat);
-    }
-    else if (GraphOutputFormat.isGraphOutputFormat(outputformat))
-    {
-      outputFormat = GraphOutputFormat.fromFormat(outputformat);
-    }
-    else
-    {
-      outputFormat = TextOutputFormat.html;
-    }
-    return outputFormat;
   }
 
   /**
@@ -576,15 +554,16 @@ public class SchemaCrawlerMojo
     executable.setAdditionalConfiguration(additionalConfiguration);
 
     logger.debug(ObjectToString.toString(executable));
-    executable.execute(connectionOptions.getConnection());
+    final Connection connection = connectionOptions.getConnection();
+    executable.execute(connection);
 
     return outputFile;
   }
 
   /**
-   * The JDBC driver classpath comes from the configuration of the SchemaCrawler
-   * plugin. The current classloader needs to be "fixed" to include the JDBC
-   * driver in the classpath.
+   * The JDBC driver classpath comes from the configuration of the
+   * SchemaCrawler plugin. The current classloader needs to be "fixed"
+   * to include the JDBC driver in the classpath.
    *
    * @throws MavenReportException
    */
@@ -608,9 +587,7 @@ public class SchemaCrawlerMojo
       logger.debug("SchemaCrawler - Maven Plugin: classpath: " + jdbcJarUrls);
 
       final Method addUrlMethod = URLClassLoader.class
-        .getDeclaredMethod("addURL", new Class[] {
-                                                   URL.class
-      });
+        .getDeclaredMethod("addURL", new Class[] { URL.class });
       addUrlMethod.setAccessible(true);
 
       final URLClassLoader classLoader = (URLClassLoader) getClass()
@@ -629,6 +606,28 @@ public class SchemaCrawlerMojo
     {
       throw new MavenReportException("Error fixing classpath", e);
     }
+  }
+
+  private OutputFormat getOutputFormat()
+  {
+    final OutputFormat outputFormat;
+    if (isBlank(outputformat))
+    {
+      outputFormat = TextOutputFormat.html;
+    }
+    else if (TextOutputFormat.isTextOutputFormat(outputformat))
+    {
+      outputFormat = TextOutputFormat.fromFormat(outputformat);
+    }
+    else if (GraphOutputFormat.isGraphOutputFormat(outputformat))
+    {
+      outputFormat = GraphOutputFormat.fromFormat(outputformat);
+    }
+    else
+    {
+      outputFormat = TextOutputFormat.html;
+    }
+    return outputFormat;
   }
 
   private Collection<String> splitTableTypes(final String tableTypesString)

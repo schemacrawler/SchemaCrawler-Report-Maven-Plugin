@@ -1,6 +1,6 @@
 [![Project Website](https://img.shields.io/badge/project_website-SchemaCrawler_Report_Maven_Plugin-7B2A90.svg)](http://sualeh.github.io/SchemaCrawler-Report-Maven-Plugin/)
 [![Build Status](https://travis-ci.org/sualeh/SchemaCrawler-Report-Maven-Plugin.svg?branch=master)](https://travis-ci.org/sualeh/SchemaCrawler-Report-Maven-Plugin)
-[![Maven Central](https://img.shields.io/maven-central/v/us.fatehi/schemacrawler.svg)](http://search.maven.org/#search%7Cga%7C1%7Cg%3Aus.fatehi%20schemacrawler)
+[![Maven Central](https://img.shields.io/maven-central/v/us.fatehi/schemacrawler.svg)](http://search.maven.org/#search%7Cga%7C1%7Cg%3Aus.fatehi%20schemacrawler%20a%3Aschemacrawler-maven-plugin)
 
 # ![SchemaCrawler](https://github.com/sualeh/SchemaCrawler/blob/master/schemacrawler-site/src/site/resources/images/schemacrawler_logo.png?raw=true) SchemaCrawler Report Maven Plugin
 

@@ -617,7 +617,7 @@ public class SchemaCrawlerMojo
     }
     else if (TextOutputFormat.isTextOutputFormat(outputformat))
     {
-      outputFormat = TextOutputFormat.fromFormat(outputformat);
+      outputFormat = TextOutputFormat.valueOfFromString(outputformat);
     }
     else if (GraphOutputFormat.isGraphOutputFormat(outputformat))
     {

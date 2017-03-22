@@ -3,13 +3,13 @@
   <parent>
     <artifactId>schemacrawler-parent</artifactId>
     <groupId>us.fatehi</groupId>
-    <version>14.14.04</version>
+    <version>14.15.01</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>us.fatehi</groupId>
   <artifactId>schemacrawler-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
-  <version>14.14.04</version>
+  <version>14.15.01</version>
   <name>SchemaCrawler Report - Maven Plugin</name>
   <inceptionYear>2011</inceptionYear>
   <licenses>

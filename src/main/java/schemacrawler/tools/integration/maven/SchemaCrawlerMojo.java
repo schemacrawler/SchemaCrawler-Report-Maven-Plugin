@@ -1,6 +1,6 @@
 /*
  *
- * SchemaCrawler Report - Maven Plugin
+ * SchemaCrawler Report - Apache Maven Plugin
  * http://www.schemacrawler.com
  * Copyright (c) 2011-2017, Sualeh Fatehi.
  *

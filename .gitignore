@@ -1,4 +1,4 @@
-# Maven build artifacts
+# Apache Maven build artifacts
 target/
 # Eclipse artifacts
 .project

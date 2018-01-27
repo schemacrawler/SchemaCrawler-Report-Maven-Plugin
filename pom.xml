@@ -3,13 +3,13 @@
   <parent>
     <artifactId>schemacrawler-parent</artifactId>
     <groupId>us.fatehi</groupId>
-    <version>14.17.05</version>
+    <version>14.18.01</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>us.fatehi</groupId>
   <artifactId>schemacrawler-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
-  <version>14.17.05</version>
+  <version>14.18.01</version>
   <name>SchemaCrawler Report - Maven Plugin</name>
   <inceptionYear>2011</inceptionYear>
   <licenses>
@@ -158,7 +158,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-javadoc-plugin</artifactId>
-          <version>2.10.3</version>
+          <version>3.0.0</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -336,7 +336,7 @@
             <plugin>
               <groupId>org.apache.maven.plugins</groupId>
               <artifactId>maven-javadoc-plugin</artifactId>
-              <version>2.9</version>
+              <version>3.0.0</version>
               <configuration>
                 <links>
                   <link>http://maven.apache.org/ref/3.3.3/maven-plugin-api/apidocs/</link>

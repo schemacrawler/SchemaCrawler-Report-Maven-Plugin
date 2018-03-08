@@ -28,6 +28,6 @@ deploy:
   skip_cleanup: true
   on:
     tags: true
-    repo: sualeh/SchemaCrawler-Report-Maven-Plugin
+    repo: schemacrawler/SchemaCrawler-Report-Maven-Plugin
     all_branches: true
  

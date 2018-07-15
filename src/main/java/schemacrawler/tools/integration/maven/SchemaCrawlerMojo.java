@@ -35,9 +35,11 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import org.apache.maven.artifact.Artifact;
@@ -56,14 +58,18 @@ import schemacrawler.schemacrawler.DatabaseConnectionOptions;
 import schemacrawler.schemacrawler.RegularExpressionRule;
 import schemacrawler.schemacrawler.SchemaCrawlerException;
 import schemacrawler.schemacrawler.SchemaCrawlerOptions;
+import schemacrawler.schemacrawler.SingleUseUserCredentials;
+import schemacrawler.schemacrawler.UserCredentials;
 import schemacrawler.tools.executable.Executable;
 import schemacrawler.tools.executable.SchemaCrawlerExecutable;
 import schemacrawler.tools.integration.graph.GraphOutputFormat;
+import schemacrawler.tools.iosource.FileInputResource;
 import schemacrawler.tools.options.InfoLevel;
 import schemacrawler.tools.options.OutputFormat;
 import schemacrawler.tools.options.OutputOptions;
 import schemacrawler.tools.options.TextOutputFormat;
 import schemacrawler.tools.text.schema.SchemaTextOptionsBuilder;
+import schemacrawler.utility.PropertiesUtility;
 import sf.util.ObjectToString;
 
 /**
@@ -85,18 +91,6 @@ public class SchemaCrawlerMojo
    */
   @Parameter(property = "config", defaultValue = "schemacrawler.config.properties", required = true)
   private String config;
-
-  /**
-   * Additional config file.
-   */
-  @Parameter(property = "additional-config", defaultValue = "schemacrawler.additional.config.properties")
-  private String additionalConfig;
-
-  /**
-   * JDBC driver class name.
-   */
-  @Parameter(property = "driver", defaultValue = "${schemacrawler.driver}", required = true)
-  private String driver;
 
   /**
    * Database connection string.
@@ -345,7 +339,8 @@ public class SchemaCrawlerMojo
     catch (final Exception e)
     {
       throw new MavenReportException("Error executing SchemaCrawler command "
-                                     + command, e);
+                                     + command,
+                                     e);
     }
   }
 
@@ -392,8 +387,8 @@ public class SchemaCrawlerMojo
     final Config textOptionsConfig = createSchemaTextOptions();
     try
     {
-      final Config additionalConfiguration = Config.load(config,
-                                                         additionalConfig);
+      final Config additionalConfiguration = PropertiesUtility
+        .loadConfig(new FileInputResource(Paths.get(config)));
       additionalConfiguration.putAll(textOptionsConfig);
       return additionalConfiguration;
     }
@@ -409,18 +404,14 @@ public class SchemaCrawlerMojo
   private ConnectionOptions createConnectionOptions()
     throws SchemaCrawlerException, MavenReportException
   {
-    try
-    {
-      Class.forName(driver);
-    }
-    catch (final ClassNotFoundException e)
-    {
-      throw new MavenReportException("Cannot load JDBC driver", e);
-    }
+    final UserCredentials userCredentials = new SingleUseUserCredentials(user,
+                                                                         password);
 
-    final ConnectionOptions connectionOptions = new DatabaseConnectionOptions(url);
-    connectionOptions.setUser(user);
-    connectionOptions.setPassword(password);
+    final Map<String, String> properties = new HashMap<>();
+    properties.put("url", url);
+
+    final ConnectionOptions connectionOptions = new DatabaseConnectionOptions(userCredentials,
+                                                                              properties);
     return connectionOptions;
   }
 
@@ -503,34 +494,19 @@ public class SchemaCrawlerMojo
   {
     final SchemaTextOptionsBuilder textOptionsBuilder = new SchemaTextOptionsBuilder();
 
-    textOptionsBuilder.hideHeader();
-    textOptionsBuilder.hideFooter();
+    textOptionsBuilder.noHeader(true);
+    textOptionsBuilder.noFooter(true);
 
     if (noinfo)
     {
-      textOptionsBuilder.hideInfo();
+      textOptionsBuilder.noInfo();
     }
-    if (noremarks)
-    {
-      textOptionsBuilder.hideRemarks();
-    }
-    if (portablenames)
-    {
-      textOptionsBuilder.portableNames();
-    }
+    textOptionsBuilder.noRemarks(noremarks);
+    textOptionsBuilder.portableNames(portablenames);
 
-    if (sorttables)
-    {
-      textOptionsBuilder.sortTables();
-    }
-    if (sortcolumns)
-    {
-      textOptionsBuilder.sortTableColumns();
-    }
-    if (sortinout)
-    {
-      textOptionsBuilder.sortInOut();
-    }
+    textOptionsBuilder.sortTables(sorttables);
+    textOptionsBuilder.sortTableColumns(sortcolumns);
+    textOptionsBuilder.sortInOut(sortinout);
 
     final Config textOptionsConfig = textOptionsBuilder.toConfig();
     return textOptionsConfig;
@@ -615,11 +591,11 @@ public class SchemaCrawlerMojo
     {
       outputFormat = TextOutputFormat.html;
     }
-    else if (TextOutputFormat.isTextOutputFormat(outputformat))
+    else if (TextOutputFormat.isSupportedFormat(outputformat))
     {
-      outputFormat = TextOutputFormat.valueOfFromString(outputformat);
+      outputFormat = TextOutputFormat.fromFormat(outputformat);
     }
-    else if (GraphOutputFormat.isGraphOutputFormat(outputformat))
+    else if (GraphOutputFormat.isSupportedFormat(outputformat))
     {
       outputFormat = GraphOutputFormat.fromFormat(outputformat);
     }

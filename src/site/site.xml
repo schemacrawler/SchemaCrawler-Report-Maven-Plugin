@@ -12,7 +12,7 @@
     <reflowSkin>
       <brand>
         <name>SchemaCrawler Report Maven Plugin</name>
-        <href>http://www.schemacrawler.com/</href>
+        <href>https://www.schemacrawler.com/</href>
       </brand>
       <slogan>Free database schema discovery and comprehension tool</slogan>
       <highlightJs>true</highlightJs>
@@ -29,7 +29,7 @@
       <link rel="stylesheet" href="./css/sc_output.css" />
     </head>
     <links>
-      <item name="SchemaCrawler" href="http://www.schemacrawler.com/" />
+      <item name="SchemaCrawler" href="https://www.schemacrawler.com/" />
     </links>
     <menu name="Overview">
       <item name="Introduction" href="index.html" />

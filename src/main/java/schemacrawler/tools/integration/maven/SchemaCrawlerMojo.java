@@ -35,23 +35,21 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.function.Consumer;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.doxia.sink.Sink;
-import org.apache.maven.doxia.siterenderer.Renderer;
+import org.apache.maven.doxia.sink.SinkFactory;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.project.MavenProject;
 import org.apache.maven.reporting.AbstractMavenReport;
 import org.apache.maven.reporting.MavenReportException;
 
 import schemacrawler.schemacrawler.Config;
 import schemacrawler.schemacrawler.ConnectionOptions;
 import schemacrawler.schemacrawler.DatabaseConnectionOptions;
+import schemacrawler.schemacrawler.DatabaseSpecificOverrideOptions;
 import schemacrawler.schemacrawler.RegularExpressionRule;
-import schemacrawler.schemacrawler.SchemaCrawlerException;
 import schemacrawler.schemacrawler.SchemaCrawlerOptions;
 import schemacrawler.schemacrawler.SingleUseUserCredentials;
 import schemacrawler.schemacrawler.UserCredentials;
@@ -65,6 +63,7 @@ import schemacrawler.tools.options.OutputOptions;
 import schemacrawler.tools.options.TextOutputFormat;
 import schemacrawler.tools.text.schema.SchemaTextOptionsBuilder;
 import schemacrawler.utility.PropertiesUtility;
+import schemacrawler.utility.SchemaCrawlerUtility;
 import sf.util.ObjectToString;
 
 /**
@@ -77,9 +76,6 @@ public class SchemaCrawlerMojo
 
   private static final String INCLUDE_ALL = ".*";
   private static final String INCLUDE_NONE = "";
-
-  @Parameter(defaultValue = "${project}", required = true, readonly = true)
-  private MavenProject project;
 
   /**
    * Config file.
@@ -207,7 +203,7 @@ public class SchemaCrawlerMojo
    * TABLE,VIEW,SYSTEM_TABLE,GLOBAL_TEMPORARY,LOCAL_TEMPORARY,ALIAS
    */
   @Parameter(property = "table_types")
-  private String table_types;
+  private String tableTypes;
 
   /**
    * Regular expression to match fully qualified table names, in the
@@ -243,6 +239,28 @@ public class SchemaCrawlerMojo
   @Parameter(property = "excludeinout", defaultValue = INCLUDE_NONE)
   private String excludeinout;
 
+  @Override
+  public void generate(final Sink sink,
+                       final SinkFactory sinkFactory,
+                       final Locale locale)
+    throws MavenReportException
+  {
+    try
+    {
+      final Path outputFile = executeSchemaCrawler();
+      final Path reportFile = Paths
+        .get(getOutputDirectory(), getOutputName() + ".html").toAbsolutePath();
+
+      Files.move(outputFile, reportFile, StandardCopyOption.REPLACE_EXISTING);
+    }
+    catch (final Exception e)
+    {
+      throw new MavenReportException("Error executing SchemaCrawler command "
+                                     + command,
+                                     e);
+    }
+  }
+
   /**
    * {@inheritDoc}
    *
@@ -251,7 +269,7 @@ public class SchemaCrawlerMojo
   @Override
   public String getDescription(final Locale locale)
   {
-    return "SchemaCrawler Report";
+    return getName(locale);
   }
 
   /**
@@ -276,98 +294,17 @@ public class SchemaCrawlerMojo
     return "schemacrawler";
   }
 
-  /**
-   * {@inheritDoc}
-   *
-   * @see org.apache.maven.reporting.AbstractMavenReport#executeReport(java.util.Locale)
-   */
+  @Override
+  public boolean isExternalReport()
+  {
+    return true;
+  }
+
   @Override
   protected void executeReport(final Locale locale)
     throws MavenReportException
   {
-    final Log logger = getLog();
-
-    try
-    {
-      final Sink sink = getSink();
-      logger.info(sink.getClass().getName());
-
-      final Path outputFile = executeSchemaCrawler();
-
-      final Consumer<? super String> outputLine = line -> {
-        sink.rawText(line);
-        sink.rawText("\n");
-        sink.flush();
-      };
-
-      final OutputFormat outputFormat = getOutputFormat();
-
-      sink.comment("BEGIN SchemaCrawler Report");
-      if (outputFormat == TextOutputFormat.html
-          || outputFormat == GraphOutputFormat.htmlx)
-      {
-        Files.lines(outputFile).forEach(outputLine);
-      }
-      else if (outputFormat instanceof TextOutputFormat)
-      {
-        sink.rawText("<pre>");
-        Files.lines(outputFile).forEach(outputLine);
-        sink.rawText("</pre>");
-      }
-      else if (outputFormat instanceof GraphOutputFormat)
-      {
-        final Path graphFile = Paths
-          .get(getReportOutputDirectory().getAbsolutePath(),
-               "schemacrawler." + outputFormat.getFormat());
-        Files.move(outputFile, graphFile, StandardCopyOption.REPLACE_EXISTING);
-
-        sink.figure();
-        sink.figureGraphics(graphFile.getFileName().toString());
-        sink.figure_();
-      }
-      sink.comment("END SchemaCrawler Report");
-
-      sink.flush();
-    }
-    catch (final Exception e)
-    {
-      throw new MavenReportException("Error executing SchemaCrawler command "
-                                     + command,
-                                     e);
-    }
-  }
-
-  /**
-   * {@inheritDoc}
-   *
-   * @see org.apache.maven.reporting.AbstractMavenReport#getOutputDirectory()
-   */
-  @Override
-  protected String getOutputDirectory()
-  {
-    return null; // Unused for Maven reports that are part of a project
-  }
-
-  /**
-   * {@inheritDoc}
-   *
-   * @see org.apache.maven.reporting.AbstractMavenReport#getProject()
-   */
-  @Override
-  protected MavenProject getProject()
-  {
-    return project;
-  }
-
-  /**
-   * {@inheritDoc}
-   *
-   * @see org.apache.maven.reporting.AbstractMavenReport#getSiteRenderer()
-   */
-  @Override
-  protected Renderer getSiteRenderer()
-  {
-    return null; // Unused for Maven reports that are part of a project
+    throw new MavenReportException("Should not execute report, generate(...) is overridden");
   }
 
   /**
@@ -395,7 +332,6 @@ public class SchemaCrawlerMojo
   }
 
   private ConnectionOptions createConnectionOptions()
-    throws SchemaCrawlerException, MavenReportException
   {
     final UserCredentials userCredentials = new SingleUseUserCredentials(user,
                                                                          password);
@@ -427,9 +363,9 @@ public class SchemaCrawlerMojo
 
     final SchemaCrawlerOptions schemaCrawlerOptions = new SchemaCrawlerOptions();
 
-    if (!isBlank(table_types))
+    if (!isBlank(tableTypes))
     {
-      schemaCrawlerOptions.setTableTypes(splitTableTypes(table_types));
+      schemaCrawlerOptions.setTableTypes(splitTableTypes(tableTypes));
     }
 
     if (!isBlank(infolevel))
@@ -487,9 +423,6 @@ public class SchemaCrawlerMojo
   {
     final SchemaTextOptionsBuilder textOptionsBuilder = new SchemaTextOptionsBuilder();
 
-    textOptionsBuilder.noHeader(true);
-    textOptionsBuilder.noFooter(true);
-
     if (noinfo)
     {
       textOptionsBuilder.noInfo();
@@ -524,7 +457,9 @@ public class SchemaCrawlerMojo
 
     logger.debug(ObjectToString.toString(executable));
     final Connection connection = connectionOptions.getConnection();
-    executable.execute(connection);
+    final DatabaseSpecificOverrideOptions databaseSpecificOverrideOptions = SchemaCrawlerUtility
+      .matchDatabaseSpecificOverrideOptions(connection);
+    executable.execute(connection, databaseSpecificOverrideOptions);
 
     return outputFile;
   }

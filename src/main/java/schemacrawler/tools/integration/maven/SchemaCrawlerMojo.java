@@ -24,16 +24,11 @@ import static org.apache.commons.lang.StringUtils.defaultString;
 import static org.apache.commons.lang.StringUtils.isBlank;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -294,8 +289,6 @@ public class SchemaCrawlerMojo
 
     try
     {
-      fixClassPath();
-
       final Sink sink = getSink();
       logger.info(sink.getClass().getName());
 
@@ -395,7 +388,7 @@ public class SchemaCrawlerMojo
     catch (final IOException e)
     {
       final Log logger = getLog();
-      logger.warn(e);
+      logger.debug(e.getMessage());
 
       return textOptionsConfig;
     }
@@ -534,54 +527,6 @@ public class SchemaCrawlerMojo
     executable.execute(connection);
 
     return outputFile;
-  }
-
-  /**
-   * The JDBC driver classpath comes from the configuration of the
-   * SchemaCrawler plugin. The current classloader needs to be "fixed"
-   * to include the JDBC driver in the classpath.
-   *
-   * @throws MavenReportException
-   */
-  private void fixClassPath()
-    throws MavenReportException
-  {
-
-    final Log logger = getLog();
-
-    try
-    {
-      final List<URL> jdbcJarUrls = new ArrayList<URL>();
-      for (final Object artifact: project.getArtifacts())
-      {
-        jdbcJarUrls.add(((Artifact) artifact).getFile().toURI().toURL());
-      }
-      for (final Artifact artifact: pluginArtifacts)
-      {
-        jdbcJarUrls.add(artifact.getFile().toURI().toURL());
-      }
-      logger.debug("SchemaCrawler - Maven Plugin: classpath: " + jdbcJarUrls);
-
-      final Method addUrlMethod = URLClassLoader.class
-        .getDeclaredMethod("addURL", new Class[] { URL.class });
-      addUrlMethod.setAccessible(true);
-
-      final URLClassLoader classLoader = (URLClassLoader) getClass()
-        .getClassLoader();
-
-      for (final URL jdbcJarUrl: jdbcJarUrls)
-      {
-        addUrlMethod.invoke(classLoader, jdbcJarUrl);
-      }
-
-      logger.info("Fixed SchemaCrawler classpath: "
-                  + Arrays.asList(classLoader.getURLs()));
-
-    }
-    catch (final Exception e)
-    {
-      throw new MavenReportException("Error fixing classpath", e);
-    }
   }
 
   private OutputFormat getOutputFormat()

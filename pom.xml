@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
     <artifactId>schemacrawler-parent</artifactId>
     <groupId>us.fatehi</groupId>
@@ -40,10 +42,10 @@
     <name>SchemaCrawler</name>
     <url>http://www.schemacrawler.com</url>
   </organization>
-	<scm>
-	  <url>https://github.com/schemacrawler/SchemaCrawler-Report-Maven-Plugin</url>
-	  <connection>scm:git:git://github.com/schemacrawler/SchemaCrawler-Report-Maven-Plugin.git</connection>
-	</scm>
+  <scm>
+    <url>https://github.com/schemacrawler/SchemaCrawler-Report-Maven-Plugin</url>
+    <connection>scm:git:git://github.com/schemacrawler/SchemaCrawler-Report-Maven-Plugin.git</connection>
+  </scm>
   <distributionManagement>
     <snapshotRepository>
       <id>sonatype-nexus-snapshots</id>
@@ -55,8 +57,9 @@
       <name>Sonatype Nexus</name>
       <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
     </repository>
-  </distributionManagement>  
-  <!-- This needed so that the Plugin Documentation has the correct System Requirements. -->
+  </distributionManagement>
+  <!-- This needed so that the Plugin Documentation has the correct System 
+    Requirements. -->
   <prerequisites>
     <maven>${maven.api.version}</maven>
   </prerequisites>
@@ -64,14 +67,14 @@
     <dependency>
       <groupId>org.apache.maven.plugin-tools</groupId>
       <artifactId>maven-plugin-annotations</artifactId>
-      <version>3.2</version>
+      <version>3.5.2</version>
       <scope>provided</scope>
     </dependency>
     <!-- SchemaCrawler Maven reporting plugin -->
     <dependency>
       <groupId>org.apache.maven.reporting</groupId>
       <artifactId>maven-reporting-impl</artifactId>
-      <version>2.2</version>
+      <version>3.0.0</version>
     </dependency>
     <!-- SchemaCrawler -->
     <dependency>
@@ -88,7 +91,7 @@
     </dependency>
   </dependencies>
   <properties>
-    <maven.api.version>3.3</maven.api.version>
+    <maven-libs.version>3.5.3</maven-libs.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <skip.signing.artifacts>true</skip.signing.artifacts>
@@ -195,7 +198,7 @@
               <artifactId>velocity</artifactId>
               <version>1.7</version>
             </dependency>
-          </dependencies>       
+          </dependencies>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -207,7 +210,8 @@
           <artifactId>maven-surefire-plugin</artifactId>
           <version>2.18.1</version>
         </plugin>
-        <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+        <!--This plugin's configuration is used to store Eclipse m2e settings 
+          only. It has no influence on the Maven build itself. -->
         <plugin>
           <groupId>org.eclipse.m2e</groupId>
           <artifactId>lifecycle-mapping</artifactId>
@@ -229,18 +233,18 @@
                   </action>
                 </pluginExecution>
                 <pluginExecution>
-                	<pluginExecutionFilter>
-                		<groupId>org.apache.maven.plugins</groupId>
-                		<artifactId>maven-plugin-plugin</artifactId>
-                		<versionRange>[3.4,)</versionRange>
-                		<goals>
-                			<goal>descriptor</goal>
-                			<goal>helpmojo</goal>
-                		</goals>
-                	</pluginExecutionFilter>
-                	<action>
-                		<ignore></ignore>
-                	</action>
+                  <pluginExecutionFilter>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-plugin-plugin</artifactId>
+                    <versionRange>[3.4,)</versionRange>
+                    <goals>
+                      <goal>descriptor</goal>
+                      <goal>helpmojo</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore></ignore>
+                  </action>
                 </pluginExecution>
               </pluginExecutions>
             </lifecycleMappingMetadata>
@@ -315,7 +319,7 @@
             </goals>
           </execution>
         </executions>
-      </plugin> 
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
@@ -327,7 +331,7 @@
             </goals>
           </execution>
         </executions>
-      </plugin>      
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-site-plugin</artifactId>
@@ -404,7 +408,7 @@
         <configuration>
           <useAgent>true</useAgent>
           <skip>${skip.signing.artifacts}</skip>
-        </configuration>        
+        </configuration>
         <executions>
           <execution>
             <id>sign-artifacts</id>
@@ -414,7 +418,7 @@
             </goals>
           </execution>
         </executions>
-      </plugin>     
+      </plugin>
     </plugins>
   </build>
 </project>

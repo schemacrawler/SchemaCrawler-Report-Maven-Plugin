@@ -9,3 +9,6 @@
 SchemaCrawler has a good mix of useful features for data governance. The SchemaCrawler Report 
 Maven Plugin allows you to integrate a SchemaCrawler report of your database within the 
 Maven-generated website for your project.
+
+See [an example Maven project that shows how to use the SchemaCrawler Report 
+Maven Plugin](https://github.com/schemacrawler/SchemaCrawler-Report-Maven-Plugin-Usage-Example).

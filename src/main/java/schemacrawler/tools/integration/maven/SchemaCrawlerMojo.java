@@ -29,9 +29,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.sql.Connection;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -48,18 +46,19 @@ import org.apache.maven.reporting.MavenReportException;
 import schemacrawler.schemacrawler.Config;
 import schemacrawler.schemacrawler.ConnectionOptions;
 import schemacrawler.schemacrawler.DatabaseConnectionOptions;
-import schemacrawler.schemacrawler.DatabaseSpecificOverrideOptions;
 import schemacrawler.schemacrawler.RegularExpressionRule;
 import schemacrawler.schemacrawler.SchemaCrawlerOptions;
+import schemacrawler.schemacrawler.SchemaCrawlerOptionsBuilder;
+import schemacrawler.schemacrawler.SchemaRetrievalOptions;
 import schemacrawler.schemacrawler.SingleUseUserCredentials;
 import schemacrawler.schemacrawler.UserCredentials;
-import schemacrawler.tools.executable.Executable;
 import schemacrawler.tools.executable.SchemaCrawlerExecutable;
 import schemacrawler.tools.integration.graph.GraphOutputFormat;
 import schemacrawler.tools.iosource.FileInputResource;
 import schemacrawler.tools.options.InfoLevel;
 import schemacrawler.tools.options.OutputFormat;
 import schemacrawler.tools.options.OutputOptions;
+import schemacrawler.tools.options.OutputOptionsBuilder;
 import schemacrawler.tools.options.TextOutputFormat;
 import schemacrawler.tools.text.schema.SchemaTextOptionsBuilder;
 import schemacrawler.utility.PropertiesUtility;
@@ -346,10 +345,10 @@ public class SchemaCrawlerMojo
 
   private OutputOptions createOutputOptions(final Path outputFile)
   {
-    final OutputOptions outputOptions = new OutputOptions();
-    outputOptions.setOutputFormatValue(getOutputFormat().getFormat());
-    outputOptions.setOutputFile(outputFile);
-    return outputOptions;
+    final OutputOptionsBuilder outputOptionsBuilder = new OutputOptionsBuilder();
+    outputOptionsBuilder.withOutputFormatValue(getOutputFormat().getFormat());
+    outputOptionsBuilder.withOutputFile(outputFile);
+    return outputOptionsBuilder.toOptions();
   }
 
   /**
@@ -361,62 +360,60 @@ public class SchemaCrawlerMojo
   {
     final Log logger = getLog();
 
-    final SchemaCrawlerOptions schemaCrawlerOptions = new SchemaCrawlerOptions();
+    final SchemaCrawlerOptionsBuilder optionsBuilder = new SchemaCrawlerOptionsBuilder();
 
-    if (!isBlank(tableTypes))
-    {
-      schemaCrawlerOptions.setTableTypes(splitTableTypes(tableTypes));
-    }
+    optionsBuilder.tableTypes(tableTypes);
 
     if (!isBlank(infolevel))
     {
       try
       {
-        schemaCrawlerOptions.setSchemaInfoLevel(InfoLevel.valueOf(infolevel)
+        optionsBuilder.withSchemaInfoLevel(InfoLevel.valueOf(infolevel)
           .buildSchemaInfoLevel());
       }
       catch (final Exception e)
       {
         logger.info("Unknown infolevel - using 'standard': " + infolevel);
-        schemaCrawlerOptions
-          .setSchemaInfoLevel(InfoLevel.standard.buildSchemaInfoLevel());
+        optionsBuilder
+          .withSchemaInfoLevel(InfoLevel.standard.buildSchemaInfoLevel());
       }
     }
 
-    schemaCrawlerOptions
-      .setSchemaInclusionRule(new RegularExpressionRule(defaultString(schemas,
-                                                                      INCLUDE_ALL),
-                                                        INCLUDE_NONE));
-    schemaCrawlerOptions
-      .setSynonymInclusionRule(new RegularExpressionRule(defaultString(synonyms,
-                                                                       INCLUDE_ALL),
-                                                         INCLUDE_NONE));
-    schemaCrawlerOptions
-      .setSequenceInclusionRule(new RegularExpressionRule(defaultString(sequences,
-                                                                        INCLUDE_ALL),
-                                                          INCLUDE_NONE));
-    schemaCrawlerOptions
-      .setTableInclusionRule(new RegularExpressionRule(defaultString(tables,
-                                                                     INCLUDE_ALL),
-                                                       INCLUDE_NONE));
-    schemaCrawlerOptions
-      .setRoutineInclusionRule(new RegularExpressionRule(defaultString(routines,
-                                                                       INCLUDE_ALL),
-                                                         INCLUDE_NONE));
+    optionsBuilder
+      .includeSchemas(new RegularExpressionRule(defaultString(schemas,
+                                                              INCLUDE_ALL),
+                                                INCLUDE_NONE));
+    optionsBuilder
+      .includeSynonyms(new RegularExpressionRule(defaultString(synonyms,
+                                                               INCLUDE_ALL),
+                                                 INCLUDE_NONE));
+    optionsBuilder
+      .includeSequences(new RegularExpressionRule(defaultString(sequences,
+                                                                INCLUDE_ALL),
+                                                  INCLUDE_NONE));
+    optionsBuilder
+      .includeTables(new RegularExpressionRule(defaultString(tables,
+                                                             INCLUDE_ALL),
+                                               INCLUDE_NONE));
+    optionsBuilder
+      .includeRoutines(new RegularExpressionRule(defaultString(routines,
+                                                               INCLUDE_ALL),
+                                                 INCLUDE_NONE));
 
-    schemaCrawlerOptions
-      .setColumnInclusionRule(new RegularExpressionRule(INCLUDE_ALL,
-                                                        defaultString(excludecolumns,
-                                                                      INCLUDE_NONE)));
-    schemaCrawlerOptions
-      .setColumnInclusionRule(new RegularExpressionRule(INCLUDE_ALL,
-                                                        defaultString(excludeinout,
-                                                                      INCLUDE_NONE)));
+    optionsBuilder
+      .includeColumns(new RegularExpressionRule(INCLUDE_ALL,
+                                                defaultString(excludecolumns,
+                                                              INCLUDE_NONE)));
+    optionsBuilder
+      .includeRoutineColumns(new RegularExpressionRule(INCLUDE_ALL,
+                                                       defaultString(excludeinout,
+                                                                     INCLUDE_NONE)));
 
-    schemaCrawlerOptions.setHideEmptyTables(hideemptytables);
-    schemaCrawlerOptions.setTitle(title);
+    if (hideemptytables) optionsBuilder.hideEmptyTables();
 
-    return schemaCrawlerOptions;
+    optionsBuilder.title(title);
+
+    return optionsBuilder.toOptions();
   }
 
   private Config createSchemaTextOptions()
@@ -450,16 +447,19 @@ public class SchemaCrawlerMojo
                                                  ".data");
     final OutputOptions outputOptions = createOutputOptions(outputFile);
 
-    final Executable executable = new SchemaCrawlerExecutable(command);
+    final SchemaCrawlerExecutable executable = new SchemaCrawlerExecutable(command);
     executable.setOutputOptions(outputOptions);
     executable.setSchemaCrawlerOptions(schemaCrawlerOptions);
     executable.setAdditionalConfiguration(additionalConfiguration);
 
     logger.debug(ObjectToString.toString(executable));
     final Connection connection = connectionOptions.getConnection();
-    final DatabaseSpecificOverrideOptions databaseSpecificOverrideOptions = SchemaCrawlerUtility
-      .matchDatabaseSpecificOverrideOptions(connection);
-    executable.execute(connection, databaseSpecificOverrideOptions);
+    final SchemaRetrievalOptions schemaRetrievalOptions = SchemaCrawlerUtility
+      .matchSchemaRetrievalOptions(connection);
+    executable.setConnection(connection);
+    executable.setSchemaRetrievalOptions(schemaRetrievalOptions);
+
+    executable.execute();
 
     return outputFile;
   }
@@ -484,28 +484,6 @@ public class SchemaCrawlerMojo
       outputFormat = TextOutputFormat.html;
     }
     return outputFormat;
-  }
-
-  private Collection<String> splitTableTypes(final String tableTypesString)
-  {
-    final Collection<String> tableTypes;
-    if (tableTypesString != null)
-    {
-      tableTypes = new HashSet<>();
-      final String[] tableTypeStrings = tableTypesString.split(",");
-      if (tableTypeStrings != null && tableTypeStrings.length > 0)
-      {
-        for (final String tableTypeString: tableTypeStrings)
-        {
-          tableTypes.add(tableTypeString.trim());
-        }
-      }
-    }
-    else
-    {
-      tableTypes = null;
-    }
-    return tableTypes;
   }
 
 }

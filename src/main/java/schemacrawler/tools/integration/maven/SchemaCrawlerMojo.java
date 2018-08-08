@@ -345,7 +345,8 @@ public class SchemaCrawlerMojo
 
   private OutputOptions createOutputOptions(final Path outputFile)
   {
-    final OutputOptionsBuilder outputOptionsBuilder = new OutputOptionsBuilder();
+    final OutputOptionsBuilder outputOptionsBuilder = OutputOptionsBuilder
+      .builder();
     outputOptionsBuilder.withOutputFormatValue(getOutputFormat().getFormat());
     outputOptionsBuilder.withOutputFile(outputFile);
     return outputOptionsBuilder.toOptions();
@@ -360,7 +361,8 @@ public class SchemaCrawlerMojo
   {
     final Log logger = getLog();
 
-    final SchemaCrawlerOptionsBuilder optionsBuilder = new SchemaCrawlerOptionsBuilder();
+    final SchemaCrawlerOptionsBuilder optionsBuilder = SchemaCrawlerOptionsBuilder
+      .builder();
 
     optionsBuilder.tableTypes(tableTypes);
 
@@ -409,7 +411,10 @@ public class SchemaCrawlerMojo
                                                        defaultString(excludeinout,
                                                                      INCLUDE_NONE)));
 
-    if (hideemptytables) optionsBuilder.hideEmptyTables();
+    if (hideemptytables)
+    {
+      optionsBuilder.noEmptyTables();
+    }
 
     optionsBuilder.title(title);
 
@@ -418,12 +423,10 @@ public class SchemaCrawlerMojo
 
   private Config createSchemaTextOptions()
   {
-    final SchemaTextOptionsBuilder textOptionsBuilder = new SchemaTextOptionsBuilder();
+    final SchemaTextOptionsBuilder textOptionsBuilder = SchemaTextOptionsBuilder
+      .builder();
 
-    if (noinfo)
-    {
-      textOptionsBuilder.noInfo();
-    }
+    textOptionsBuilder.noInfo(noinfo);
     textOptionsBuilder.noRemarks(noremarks);
     textOptionsBuilder.portableNames(portablenames);
 

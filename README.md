@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/schemacrawler/SchemaCrawler-Report-Maven-Plugin.svg?branch=master)](https://travis-ci.org/schemacrawler/SchemaCrawler-Report-Maven-Plugin)
-[![Maven Central](https://img.shields.io/maven-central/v/us.fatehi/schemacrawler.svg)](http://search.maven.org/#search%7Cga%7C1%7Cg%3Aus.fatehi%20schemacrawler%20a%3Aschemacrawler-maven-plugin)
+[![The Central Repository](https://img.shields.io/maven-central/v/us.fatehi/schemacrawler.svg)](https://search.maven.org/search?q=g:us.fatehi%20a:schemacrawler*)
 
 # ![SchemaCrawler](https://github.com/schemacrawler/SchemaCrawler/raw/master/schemacrawler-docs/logo/schemacrawler_logo.png?raw=true) SchemaCrawler Report Maven Plugin
 

@@ -8,14 +8,9 @@ cache:
   directories:
     - .autoconf
     - $HOME/.m2
-    - $HOME/.embedpostgresql
-    - $HOME/.embedmysql
 addons:
   apt:
     packages:
       - graphviz
 script:
-  - mvn -Dcomplete clean package jacoco:report-aggregate coveralls:report
-after_success:
-  - bash <(curl -s https://codecov.io/bash)
-
+  - mvn clean package

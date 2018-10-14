@@ -145,8 +145,8 @@ public class SchemaCrawlerMojo
   /**
    * Whether to hide tables with no data.
    */
-  @Parameter(property = "hideemptytables", defaultValue = "false")
-  private boolean hideemptytables;
+  @Parameter(property = "noemptytables", defaultValue = "false")
+  private boolean noemptytables;
 
   /**
    * Title for the SchemaCrawler Report.
@@ -411,7 +411,7 @@ public class SchemaCrawlerMojo
                                                        defaultString(excludeinout,
                                                                      INCLUDE_NONE)));
 
-    if (hideemptytables)
+    if (noemptytables)
     {
       optionsBuilder.noEmptyTables();
     }

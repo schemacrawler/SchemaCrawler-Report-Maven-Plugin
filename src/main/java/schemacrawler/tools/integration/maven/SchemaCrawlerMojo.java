@@ -46,6 +46,7 @@ import org.apache.maven.reporting.MavenReportException;
 import schemacrawler.schemacrawler.Config;
 import schemacrawler.schemacrawler.ConnectionOptions;
 import schemacrawler.schemacrawler.DatabaseConnectionOptions;
+import schemacrawler.schemacrawler.InfoLevel;
 import schemacrawler.schemacrawler.RegularExpressionRule;
 import schemacrawler.schemacrawler.SchemaCrawlerOptions;
 import schemacrawler.schemacrawler.SchemaCrawlerOptionsBuilder;
@@ -55,7 +56,6 @@ import schemacrawler.schemacrawler.UserCredentials;
 import schemacrawler.tools.executable.SchemaCrawlerExecutable;
 import schemacrawler.tools.integration.graph.GraphOutputFormat;
 import schemacrawler.tools.iosource.FileInputResource;
-import schemacrawler.tools.options.InfoLevel;
 import schemacrawler.tools.options.OutputFormat;
 import schemacrawler.tools.options.OutputOptions;
 import schemacrawler.tools.options.OutputOptionsBuilder;
@@ -371,13 +371,13 @@ public class SchemaCrawlerMojo
       try
       {
         optionsBuilder.withSchemaInfoLevel(InfoLevel.valueOf(infolevel)
-          .buildSchemaInfoLevel());
+          .toSchemaInfoLevel());
       }
       catch (final Exception e)
       {
         logger.info("Unknown infolevel - using 'standard': " + infolevel);
         optionsBuilder
-          .withSchemaInfoLevel(InfoLevel.standard.buildSchemaInfoLevel());
+          .withSchemaInfoLevel(InfoLevel.standard.toSchemaInfoLevel());
       }
     }
 

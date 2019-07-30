@@ -4,10 +4,6 @@ jdk:
 os:
   - linux
 sudo: false
-cache:
-  directories:
-    - .autoconf
-    - $HOME/.m2
 addons:
   apt:
     packages:

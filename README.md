@@ -2,7 +2,9 @@
 
 [![The Central Repository](https://img.shields.io/maven-central/v/us.fatehi/schemacrawler-maven-plugin.svg)](https://search.maven.org/search?q=g:us.fatehi%20a:schemacrawler*)
 
-# ![SchemaCrawler](https://github.com/schemacrawler/SchemaCrawler/raw/master/schemacrawler-docs/logo/schemacrawler_logo.png?raw=true) SchemaCrawler Report Maven Plugin
+![SchemaCrawler](https://raw.githubusercontent.com/schemacrawler/SchemaCrawler/master/schemacrawler-distrib/src/site/resources/images/schemacrawler_logo.png) 
+
+# SchemaCrawler Report Maven Plugin
 
 > **Please see the [SchemaCrawler website](http://www.schemacrawler.com/) for more details.**
 

@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
     <artifactId>schemacrawler-parent</artifactId>
     <groupId>us.fatehi</groupId>
-    <version>15.06.01</version>
+    <version>16.1.1</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>us.fatehi</groupId>
   <artifactId>schemacrawler-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
-  <version>15.06.01</version>
+  <version>16.1.1</version>
   <name>SchemaCrawler Report - Maven Plugin</name>
   <inceptionYear>2011</inceptionYear>
   <licenses>
@@ -70,7 +70,7 @@
       <version>3.5.2</version>
       <scope>provided</scope>
     </dependency>
-    <!-- SchemaCrawler Maven reporting plugin -->
+    <!-- SchemaCrawler Maven reporting commandline -->
     <dependency>
       <groupId>org.apache.maven.reporting</groupId>
       <artifactId>maven-reporting-impl</artifactId>
@@ -82,11 +82,17 @@
       <artifactId>schemacrawler</artifactId>
       <version>${schemacrawler.version}</version>
     </dependency>
+    <!-- Other -->
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-dbcp2</artifactId>
+      <version>2.5.0</version>
+    </dependency>
     <!-- Testing -->
     <dependency>
       <groupId>org.hsqldb</groupId>
       <artifactId>hsqldb</artifactId>
-      <version>2.4.1</version>
+      <version>2.5.0</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -95,12 +101,12 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <skip.signing.artifacts>true</skip.signing.artifacts>
-    <schemacrawler.version>15.06.01</schemacrawler.version>
+    <schemacrawler.version>16.1.1</schemacrawler.version>
     <!-- Properties for Site documentation (may not use period)... -->
     <SchemacrawlerVersion>${schemacrawler.version}</SchemacrawlerVersion>
   </properties>
   <build>
-    <!-- Best practice is to control the plugin versions to ensure reproducibility... -->
+    <!-- Best practice is to control the commandline versions to ensure reproducibility... -->
     <pluginManagement>
       <plugins>
         <plugin>
@@ -198,7 +204,7 @@
           <artifactId>maven-surefire-plugin</artifactId>
           <version>2.18.1</version>
         </plugin>
-        <!--This plugin's configuration is used to store Eclipse m2e settings
+        <!--This commandline's configuration is used to store Eclipse m2e settings
           only. It has no influence on the Maven build itself. -->
         <plugin>
           <groupId>org.eclipse.m2e</groupId>
@@ -293,7 +299,6 @@
             <extractor>java-annotations</extractor>
           </extractors>
           <skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
-          <useJava5>true</useJava5>
         </configuration>
       </plugin>
       <plugin>
@@ -362,7 +367,7 @@
                 <driver>org.hsqldb.jdbc.JDBCDriver</driver>
                 <url>jdbc:hsqldb:file:${project.build.directory}/hsqldb/sample;shutdown=true</url>
                 <user>sa</user>
-                <password />
+                <password/>
               </configuration>
             </plugin>
           </reportPlugins>

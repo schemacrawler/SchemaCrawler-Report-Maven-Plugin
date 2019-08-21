@@ -6,7 +6,7 @@
 
 # SchemaCrawler Report Maven Plugin
 
-> **Please see the [SchemaCrawler website](http://www.schemacrawler.com/) for more details.**
+> **Please see the [SchemaCrawler website](https://www.schemacrawler.com/) for more details.**
 
 The SchemaCrawler Report Maven Plugin allows you to integrate a SchemaCrawler report of your database within the Maven-generated website for your project.
 

@@ -5,29 +5,13 @@
   <parent>
     <artifactId>schemacrawler-parent</artifactId>
     <groupId>us.fatehi</groupId>
-<<<<<<< HEAD
     <version>16.3.2</version>
-=======
-<<<<<<< HEAD
-    <version>16.3.2</version>
-=======
-    <version>16.3.1</version>
->>>>>>> 2475e3523a5de621ee659252066bdebbbc62dcc2
->>>>>>> 78eeaca3cc1af7c5609dff15934bc8ff10f6b44c
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>us.fatehi</groupId>
   <artifactId>schemacrawler-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
-<<<<<<< HEAD
   <version>16.3.2</version>
-=======
-<<<<<<< HEAD
-  <version>16.3.2</version>
-=======
-  <version>16.3.1</version>
->>>>>>> 2475e3523a5de621ee659252066bdebbbc62dcc2
->>>>>>> 78eeaca3cc1af7c5609dff15934bc8ff10f6b44c
   <name>SchemaCrawler Report - Maven Plugin</name>
   <inceptionYear>2011</inceptionYear>
   <licenses>
@@ -117,15 +101,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <skip.signing.artifacts>true</skip.signing.artifacts>
-<<<<<<< HEAD
     <schemacrawler.version>16.3.2</schemacrawler.version>
-=======
-<<<<<<< HEAD
-    <schemacrawler.version>16.3.2</schemacrawler.version>
-=======
-    <schemacrawler.version>16.3.1</schemacrawler.version>
->>>>>>> 2475e3523a5de621ee659252066bdebbbc62dcc2
->>>>>>> 78eeaca3cc1af7c5609dff15934bc8ff10f6b44c
     <!-- Properties for Site documentation (may not use period)... -->
     <SchemacrawlerVersion>${schemacrawler.version}</SchemacrawlerVersion>
   </properties>

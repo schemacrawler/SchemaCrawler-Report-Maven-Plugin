@@ -8,3 +8,5 @@ target/
 /release.properties
 /LICENSE.txt
 pom.xml.releaseBackup
+.idea/
+**/*.iml

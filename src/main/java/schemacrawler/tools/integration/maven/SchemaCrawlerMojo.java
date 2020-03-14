@@ -42,9 +42,14 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.reporting.AbstractMavenReport;
 import org.apache.maven.reporting.MavenReportException;
-import schemacrawler.schemacrawler.*;
+import schemacrawler.schemacrawler.Config;
+import schemacrawler.schemacrawler.InfoLevel;
+import schemacrawler.schemacrawler.RegularExpressionRule;
+import schemacrawler.schemacrawler.SchemaCrawlerOptions;
+import schemacrawler.schemacrawler.SchemaCrawlerOptionsBuilder;
+import schemacrawler.schemacrawler.SchemaRetrievalOptions;
 import schemacrawler.tools.executable.SchemaCrawlerExecutable;
-import schemacrawler.tools.integration.graph.GraphOutputFormat;
+import schemacrawler.tools.integration.diagram.DiagramOutputFormat;
 import schemacrawler.tools.iosource.FileInputResource;
 import schemacrawler.tools.options.OutputFormat;
 import schemacrawler.tools.options.OutputOptions;
@@ -439,9 +444,9 @@ public class SchemaCrawlerMojo
     {
       outputFormat = TextOutputFormat.fromFormat(outputformat);
     }
-    else if (GraphOutputFormat.isSupportedFormat(outputformat))
+    else if (DiagramOutputFormat.isSupportedFormat(outputformat))
     {
-      outputFormat = GraphOutputFormat.fromFormat(outputformat);
+      outputFormat = DiagramOutputFormat.fromFormat(outputformat);
     }
     else
     {

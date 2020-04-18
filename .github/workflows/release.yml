@@ -1,0 +1,83 @@
+name: Create Release
+
+on:
+  create:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+
+# SETUP BUILD ENVIRONMENT
+    - id: checkout-code
+      name: Checkout code
+      uses: actions/checkout@v1
+    - id: setup-jdk
+      name: Setup JDK
+      uses: actions/setup-java@v1
+      with:
+        java-version: 8
+        server-id: sonatype-nexus
+        server-username: MAVEN_USERNAME
+        server-password: MAVEN_PASSWORD
+    - id: install-packages
+      name: Install packages
+      run: |
+        sudo apt-get -qq update
+        sudo apt-get -q install graphviz
+    - id: show-environment
+      name: Show environment
+      run: |
+        echo github.repository: ${{ github.repository }}
+        echo github.ref: ${{ github.head_ref || github.ref }}
+        echo github.sha: ${{ github.sha }}
+        mvn -v
+        cat ~/.m2/settings.xml
+
+# BUILD FOR DISTRIBUTION
+    - id: build
+      name: Build and test for distribution
+      run: |
+        mvn \
+          --no-transfer-progress \
+          --batch-mode \
+          clean install
+
+# CREATE GITHUB RELEASE
+    - id: create-release
+      name: Create GitHub release
+      uses: actions/create-release@latest
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: ${{ github.ref }}
+        body: |
+          SchemaCrawler Release ${{ github.sha }}
+        draft: false
+        prerelease: false
+
+# PUBLISH TO CENTRAL REPOSITORY
+    - id: install-secret-key
+      name: Install secret key
+      # Note: OSSRH_GPG_SECRET_KEY is exported using gpg --export-secret-keys -a <keyid>
+      # and has newlines substituted with a literal \n
+      run: |
+        cat <(echo -e "${{ secrets.OSSRH_GPG_SECRET_KEY }}") | gpg --batch --import
+        gpg --list-secret-keys --keyid-format LONG
+    - id: publish-to-central
+      name: Publish to Central Repository
+      env:
+        MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+        MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
+      run: |
+        mvn \
+          --no-transfer-progress \
+          --batch-mode \
+          -Dmaven.javadoc.skip=false \
+          -Dskip.signing.artifacts=false \
+          -Dgpg.passphrase=${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }} \
+          clean deploy

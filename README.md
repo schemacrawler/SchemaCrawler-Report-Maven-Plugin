@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/schemacrawler/SchemaCrawler-Report-Maven-Plugin.svg?branch=master)](https://travis-ci.org/schemacrawler/SchemaCrawler-Report-Maven-Plugin)
+![Quick Build](https://github.com/schemacrawler/SchemaCrawler-Report-Maven-Plugin/workflows/Quick%20Build/badge.svg)
 
 [![The Central Repository](https://img.shields.io/maven-central/v/us.fatehi/schemacrawler-maven-plugin.svg)](https://search.maven.org/search?q=g:us.fatehi%20a:schemacrawler*)
 

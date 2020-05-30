@@ -43,8 +43,11 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.reporting.AbstractMavenReport;
 import org.apache.maven.reporting.MavenReportException;
 import schemacrawler.schemacrawler.Config;
+import schemacrawler.schemacrawler.FilterOptionsBuilder;
 import schemacrawler.schemacrawler.InfoLevel;
 import schemacrawler.inclusionrule.RegularExpressionRule;
+import schemacrawler.schemacrawler.LimitOptionsBuilder;
+import schemacrawler.schemacrawler.LoadOptionsBuilder;
 import schemacrawler.schemacrawler.SchemaCrawlerOptions;
 import schemacrawler.schemacrawler.SchemaCrawlerOptionsBuilder;
 import schemacrawler.schemacrawler.SchemaRetrievalOptions;
@@ -334,54 +337,62 @@ public class SchemaCrawlerMojo
   {
     final Log logger = getLog();
 
+    final LimitOptionsBuilder limitOptionsBuilder = LimitOptionsBuilder
+      .builder();
     final SchemaCrawlerOptionsBuilder optionsBuilder = SchemaCrawlerOptionsBuilder
       .builder();
 
-    optionsBuilder.tableTypes(tableTypes);
+    limitOptionsBuilder.tableTypes(tableTypes);
 
+    final LoadOptionsBuilder loadOptionsBuilder = LoadOptionsBuilder.builder();
     if (!isBlank(infolevel))
     {
       try
       {
-        optionsBuilder.withSchemaInfoLevel(InfoLevel.valueOf(infolevel)
+        loadOptionsBuilder.withSchemaInfoLevel(InfoLevel.valueOf(infolevel)
                                              .toSchemaInfoLevel());
       }
       catch (final Exception e)
       {
         logger.info("Unknown infolevel - using 'standard': " + infolevel);
-        optionsBuilder
+        loadOptionsBuilder
           .withSchemaInfoLevel(InfoLevel.standard.toSchemaInfoLevel());
       }
     }
+    optionsBuilder.withLoadOptionsBuilder(loadOptionsBuilder);
 
-    optionsBuilder.includeSchemas(new RegularExpressionRule(defaultString(
+    limitOptionsBuilder.includeSchemas(new RegularExpressionRule(defaultString(
       schemas,
       INCLUDE_ALL), INCLUDE_NONE));
-    optionsBuilder.includeSynonyms(new RegularExpressionRule(defaultString(
+    limitOptionsBuilder.includeSynonyms(new RegularExpressionRule(defaultString(
       synonyms,
       INCLUDE_ALL), INCLUDE_NONE));
-    optionsBuilder.includeSequences(new RegularExpressionRule(defaultString(
+    limitOptionsBuilder.includeSequences(new RegularExpressionRule(defaultString(
       sequences,
       INCLUDE_ALL), INCLUDE_NONE));
-    optionsBuilder.includeTables(new RegularExpressionRule(defaultString(tables,
+    limitOptionsBuilder.includeTables(new RegularExpressionRule(defaultString(tables,
                                                                          INCLUDE_ALL),
                                                            INCLUDE_NONE));
-    optionsBuilder.includeRoutines(new RegularExpressionRule(defaultString(
+    limitOptionsBuilder.includeRoutines(new RegularExpressionRule(defaultString(
       routines,
       INCLUDE_ALL), INCLUDE_NONE));
 
-    optionsBuilder.includeColumns(new RegularExpressionRule(INCLUDE_ALL,
+    limitOptionsBuilder.includeColumns(new RegularExpressionRule(INCLUDE_ALL,
                                                             defaultString(
                                                               excludecolumns,
                                                               INCLUDE_NONE)));
-    optionsBuilder.includeRoutineParameters(new RegularExpressionRule(
+    limitOptionsBuilder.includeRoutineParameters(new RegularExpressionRule(
       INCLUDE_ALL,
       defaultString(excludeparameters, INCLUDE_NONE)));
 
     if (noemptytables)
     {
-      optionsBuilder.noEmptyTables();
+      final FilterOptionsBuilder filterOptionsBuilder = FilterOptionsBuilder.builder()
+        .noEmptyTables();
+      optionsBuilder.withFilterOptionsBuilder(filterOptionsBuilder);
     }
+
+    optionsBuilder.withLimitOptionsBuilder(limitOptionsBuilder);
 
     return optionsBuilder.toOptions();
   }

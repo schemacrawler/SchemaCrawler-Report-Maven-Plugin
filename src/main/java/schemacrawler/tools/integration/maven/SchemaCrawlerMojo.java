@@ -141,7 +141,7 @@ public class SchemaCrawlerMojo
   /**
    * Regular expression to match fully qualified routine names, in the
    * form "CATALOGNAME.SCHEMANAME.ROUTINENAME" - for example,
-   * .*\.C.*|.*\.P.* matches any routines whose names start with C or P
+   * .*\..*\.C.*|.*\..*\.P.* matches any routines whose names start with C or P
    * Routines that do not match the pattern are not displayed
    */
   @Parameter(property = "routines", defaultValue = INCLUDE_ALL)
@@ -154,7 +154,7 @@ public class SchemaCrawlerMojo
   /**
    * Regular expression to match fully qualified sequence names, in the
    * form "CATALOGNAME.SCHEMANAME.SEQUENCENAME" - for example,
-   * .*\.C.*|.*\.P.* Sequences that do not match the pattern are not
+   * .*\..*\.C.*|.*\..*\.P.* Sequences that do not match the pattern are not
    * displayed.
    */
   @Parameter(property = "sequences", defaultValue = INCLUDE_ALL)
@@ -177,7 +177,7 @@ public class SchemaCrawlerMojo
   /**
    * Regular expression to match fully qualified synonym names, in the
    * form "CATALOGNAME.SCHEMANAME.SYNONYMNAME" - for example,
-   * .*\.C.*|.*\.P.* Synonyms that do not match the pattern are not
+   * .*\..*\.C.*|.*\..*\.P.* Synonyms that do not match the pattern are not
    * displayed.
    */
   @Parameter(property = "synonyms", defaultValue = INCLUDE_ALL)
@@ -192,7 +192,7 @@ public class SchemaCrawlerMojo
   /**
    * Regular expression to match fully qualified table names, in the
    * form "CATALOGNAME.SCHEMANAME.TABLENAME" - for example,
-   * .*\.C.*|.*\.P.* Tables that do not match the pattern are not
+   * .*\..*\.C.*|.*\..*\.P.* Tables that do not match the pattern are not
    * displayed.
    */
   @Parameter(property = "tables", defaultValue = INCLUDE_ALL)

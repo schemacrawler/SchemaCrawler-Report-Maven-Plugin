@@ -20,6 +20,7 @@
 package schemacrawler.tools.integration.maven;
 
 
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.apache.commons.lang.StringUtils.defaultString;
 import static org.apache.commons.lang.StringUtils.isBlank;
 
@@ -28,16 +29,14 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.doxia.sink.Sink;
-import org.apache.maven.doxia.sink.SinkFactory;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -126,7 +125,8 @@ public class SchemaCrawlerMojo
   /**
    * Output file.
    */
-  @Parameter(property = "outputfile", defaultValue = "schemacrawler.html")
+  @Parameter(property = "outputfile",
+             defaultValue = "schemacrawler-output.html")
   private String outputfile;
   /**
    * Database connection user password.
@@ -221,45 +221,6 @@ public class SchemaCrawlerMojo
              required = true)
   private String user;
 
-  @Override
-  public void generate(final Sink sink,
-                       final SinkFactory sinkFactory,
-                       final Locale locale)
-    throws MavenReportException
-  {
-    try
-    {
-      final Path outputFile = executeSchemaCrawler();
-      final Path reportFile = Paths
-        .get(getOutputDirectory(),
-             String.format("%s.%s",
-                           getOutputName(),
-                           getOutputFileExtension().orElse("html")))
-        .toAbsolutePath();
-
-      Files.move(outputFile, reportFile, StandardCopyOption.REPLACE_EXISTING);
-    }
-    catch (final Exception e)
-    {
-      throw new MavenReportException("Error executing SchemaCrawler command "
-                                     + command, e);
-    }
-  }
-
-  @Override
-  public boolean isExternalReport()
-  {
-    return true;
-  }
-
-  @Override
-  protected void executeReport(final Locale locale)
-    throws MavenReportException
-  {
-    throw new MavenReportException(
-      "Should not execute report, generate(...) is overridden");
-  }
-
   /**
    * {@inheritDoc}
    *
@@ -268,7 +229,7 @@ public class SchemaCrawlerMojo
   @Override
   public String getOutputName()
   {
-    return getOutputFileStem().orElse("schemacrawler");
+    return "schemacrawler-report";
   }
 
   /**
@@ -293,34 +254,72 @@ public class SchemaCrawlerMojo
     return getName(locale);
   }
 
-  private Optional<String> getOutputFileExtension()
+  @Override
+  protected void executeReport(final Locale locale)
+    throws MavenReportException
   {
-    final String filename = getOutputFilename();
-    return Optional
-      .ofNullable(filename)
-      .filter(f -> f.contains("."))
-      .map(f -> f.substring(filename.lastIndexOf(".") + 1))
-      .map(e -> e.isEmpty()? outputformat: e);
+    try
+    {
+      final Path outputFile = executeSchemaCrawler();
+      final Path reportFile = Paths
+        .get(getOutputDirectory(), getOutputFilename())
+        .toAbsolutePath();
+
+      Files.move(outputFile, reportFile, REPLACE_EXISTING);
+
+      // Get the Maven Doxia Sink, which will be used to generate the
+      // various elements of the document
+      Sink mainSink = getSink();
+      if (mainSink == null)
+      {
+        throw new MavenReportException("Could not get the Doxia sink");
+      }
+
+      // Page title
+      mainSink.head();
+      mainSink.title();
+      mainSink.text(getName(Locale.getDefault()));
+      mainSink.title_();
+      mainSink.head_();
+
+      mainSink.body();
+
+      // Heading 1
+      mainSink.section1();
+      mainSink.sectionTitle1();
+      mainSink.text(getName(Locale.getDefault()));
+      mainSink.sectionTitle1_();
+
+      // Content
+      mainSink.paragraph();
+      mainSink.link(getOutputFilename());
+      mainSink.text(title);
+      mainSink.link_();
+      mainSink.paragraph_();
+
+      // Close
+      mainSink.section1_();
+      mainSink.body_();
+    }
+    catch (final Exception e)
+    {
+      throw new MavenReportException("Error executing SchemaCrawler report", e);
+    }
   }
 
   private String getOutputFilename()
   {
-    if (outputfile == null)
-    { return null; }
-    return Paths
-      .get(outputfile)
-      .getFileName()
-      .toString();
-  }
-
-  private Optional<String> getOutputFileStem()
-  {
-    final String filename = getOutputFilename();
-    return Optional
-      .ofNullable(filename)
-      .filter(f -> f.contains("."))
-      .map(f -> f.substring(0, filename.lastIndexOf(".")))
-      .map(e -> e.isEmpty()? null: e);
+    if (outputfile == null || StringUtils.isBlank(outputfile))
+    {
+      return String.format("schemacrawler-output.%s", outputformat);
+    }
+    else
+    {
+      return Paths
+        .get(outputfile)
+        .getFileName()
+        .toString();
+    }
   }
 
   /**

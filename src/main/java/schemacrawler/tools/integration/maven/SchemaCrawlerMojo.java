@@ -20,44 +20,41 @@
 package schemacrawler.tools.integration.maven;
 
 
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.apache.commons.lang.StringUtils.defaultString;
 import static org.apache.commons.lang.StringUtils.isBlank;
 
-import javax.sql.DataSource;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.util.List;
 import java.util.Locale;
 
-import org.apache.commons.dbcp2.BasicDataSource;
+import org.apache.commons.lang.StringUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.doxia.sink.Sink;
-import org.apache.maven.doxia.sink.SinkFactory;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.reporting.AbstractMavenReport;
 import org.apache.maven.reporting.MavenReportException;
+import schemacrawler.inclusionrule.RegularExpressionRule;
 import schemacrawler.schemacrawler.Config;
 import schemacrawler.schemacrawler.FilterOptionsBuilder;
 import schemacrawler.schemacrawler.InfoLevel;
-import schemacrawler.inclusionrule.RegularExpressionRule;
 import schemacrawler.schemacrawler.LimitOptionsBuilder;
 import schemacrawler.schemacrawler.LoadOptionsBuilder;
 import schemacrawler.schemacrawler.SchemaCrawlerOptions;
 import schemacrawler.schemacrawler.SchemaCrawlerOptionsBuilder;
 import schemacrawler.schemacrawler.SchemaRetrievalOptions;
 import schemacrawler.tools.executable.SchemaCrawlerExecutable;
-import schemacrawler.tools.integration.diagram.DiagramOutputFormat;
 import schemacrawler.tools.iosource.FileInputResource;
-import schemacrawler.tools.options.OutputFormat;
 import schemacrawler.tools.options.OutputOptions;
 import schemacrawler.tools.options.OutputOptionsBuilder;
-import schemacrawler.tools.options.TextOutputFormat;
 import schemacrawler.tools.text.schema.SchemaTextOptionsBuilder;
 import schemacrawler.utility.PropertiesUtility;
 import schemacrawler.utility.SchemaCrawlerUtility;
@@ -81,25 +78,27 @@ public class SchemaCrawlerMojo
   /**
    * Config file.
    */
-  @Parameter(property = "config", defaultValue = "schemacrawler.config.properties", required = true)
-  private String config;
+  @Parameter(property = "config",
+             defaultValue = "schemacrawler.config.properties",
+             required = true)
+  private File config;
   /**
-   * Regular expression to match fully qualified column names, in the
-   * form "CATALOGNAME.SCHEMANAME.TABLENAME.COLUMNNAME" - for example,
-   * .*\.STREET|.*\.PRICE matches columns named STREET or PRICE in any
-   * table Columns that match the pattern are not displayed
+   * Regular expression to match fully qualified column names, in the form
+   * "CATALOGNAME.SCHEMANAME.TABLENAME.COLUMNNAME" - for example,
+   * .*\.STREET|.*\.PRICE matches columns named STREET or PRICE in any table
+   * Columns that match the pattern are not displayed
    */
   @Parameter(property = "excludecolumns", defaultValue = INCLUDE_NONE)
   private String excludecolumns;
   /**
-   * Regular expression to match fully qualified parameter names.
-   * Parameters that match the pattern are not displayed
+   * Regular expression to match fully qualified parameter names. Parameters
+   * that match the pattern are not displayed
    */
   @Parameter(property = "excludeparameters", defaultValue = INCLUDE_NONE)
   private String excludeparameters;
   /**
-   * The info level determines the amount of database metadata
-   * retrieved, and also determines the time taken to crawl the schema.
+   * The info level determines the amount of database metadata retrieved, and
+   * also determines the time taken to crawl the schema.
    */
   @Parameter(property = "infolevel", defaultValue = "standard", required = true)
   private String infolevel;
@@ -124,6 +123,12 @@ public class SchemaCrawlerMojo
   @Parameter(property = "outputformat", defaultValue = "html")
   private String outputformat;
   /**
+   * Output file.
+   */
+  @Parameter(property = "outputfile",
+             defaultValue = "schemacrawler-output.html")
+  private String outputfile;
+  /**
    * Database connection user password.
    */
   @Parameter(property = "password", defaultValue = "${schemacrawler.password}")
@@ -131,7 +136,9 @@ public class SchemaCrawlerMojo
   /**
    * The commandline dependencies.
    */
-  @Parameter(property = "commandline.artifacts", required = true, readonly = true)
+  @Parameter(property = "commandline.artifacts",
+             required = true,
+             readonly = true)
   private List<Artifact> pluginArtifacts;
   /**
    * Whether to show portable database object names.
@@ -139,10 +146,10 @@ public class SchemaCrawlerMojo
   @Parameter(property = "portablenames", defaultValue = "false")
   private boolean portablenames;
   /**
-   * Regular expression to match fully qualified routine names, in the
-   * form "CATALOGNAME.SCHEMANAME.ROUTINENAME" - for example,
-   * .*\..*\.C.*|.*\..*\.P.* matches any routines whose names start with C or P
-   * Routines that do not match the pattern are not displayed
+   * Regular expression to match fully qualified routine names, in the form
+   * "CATALOGNAME.SCHEMANAME.ROUTINENAME" - for example, .*\..*\.C.*|.*\..*\.P.*
+   * matches any routines whose names start with C or P Routines that do not
+   * match the pattern are not displayed
    */
   @Parameter(property = "routines", defaultValue = INCLUDE_ALL)
   private String routines;
@@ -152,8 +159,8 @@ public class SchemaCrawlerMojo
   @Parameter(property = "schemas", defaultValue = INCLUDE_ALL)
   private String schemas;
   /**
-   * Regular expression to match fully qualified sequence names, in the
-   * form "CATALOGNAME.SCHEMANAME.SEQUENCENAME" - for example,
+   * Regular expression to match fully qualified sequence names, in the form
+   * "CATALOGNAME.SCHEMANAME.SEQUENCENAME" - for example,
    * .*\..*\.C.*|.*\..*\.P.* Sequences that do not match the pattern are not
    * displayed.
    */
@@ -175,25 +182,22 @@ public class SchemaCrawlerMojo
   @Parameter(property = "sorttables", defaultValue = "true")
   private boolean sorttables;
   /**
-   * Regular expression to match fully qualified synonym names, in the
-   * form "CATALOGNAME.SCHEMANAME.SYNONYMNAME" - for example,
-   * .*\..*\.C.*|.*\..*\.P.* Synonyms that do not match the pattern are not
-   * displayed.
+   * Regular expression to match fully qualified synonym names, in the form
+   * "CATALOGNAME.SCHEMANAME.SYNONYMNAME" - for example, .*\..*\.C.*|.*\..*\.P.*
+   * Synonyms that do not match the pattern are not displayed.
    */
   @Parameter(property = "synonyms", defaultValue = INCLUDE_ALL)
   private String synonyms;
   /**
-   * Comma-separated list of table types of
-   * TABLE,VIEW,SYSTEM_TABLE,GLOBAL_TEMPORARY,LOCAL_TEMPORARY,ALIAS
+   * Comma-separated list of table types of TABLE,VIEW,SYSTEM_TABLE,GLOBAL_TEMPORARY,LOCAL_TEMPORARY,ALIAS
    */
   @Parameter(property = "table_types")
   private String tableTypes;
 
   /**
-   * Regular expression to match fully qualified table names, in the
-   * form "CATALOGNAME.SCHEMANAME.TABLENAME" - for example,
-   * .*\..*\.C.*|.*\..*\.P.* Tables that do not match the pattern are not
-   * displayed.
+   * Regular expression to match fully qualified table names, in the form
+   * "CATALOGNAME.SCHEMANAME.TABLENAME" - for example, .*\..*\.C.*|.*\..*\.P.*
+   * Tables that do not match the pattern are not displayed.
    */
   @Parameter(property = "tables", defaultValue = INCLUDE_ALL)
   private String tables;
@@ -205,48 +209,17 @@ public class SchemaCrawlerMojo
   /**
    * Database connection string.
    */
-  @Parameter(property = "url", defaultValue = "${schemacrawler.url}", required = true)
+  @Parameter(property = "url",
+             defaultValue = "${schemacrawler.url}",
+             required = true)
   private String url;
   /**
    * Database connection user name.
    */
-  @Parameter(property = "user", defaultValue = "${schemacrawler.user}", required = true)
+  @Parameter(property = "user",
+             defaultValue = "${schemacrawler.user}",
+             required = true)
   private String user;
-
-  @Override
-  public void generate(final Sink sink,
-                       final SinkFactory sinkFactory,
-                       final Locale locale)
-    throws MavenReportException
-  {
-    try
-    {
-      final Path outputFile = executeSchemaCrawler();
-      final Path reportFile = Paths
-        .get(getOutputDirectory(), getOutputName() + ".html").toAbsolutePath();
-
-      Files.move(outputFile, reportFile, StandardCopyOption.REPLACE_EXISTING);
-    }
-    catch (final Exception e)
-    {
-      throw new MavenReportException(
-        "Error executing SchemaCrawler command " + command, e);
-    }
-  }
-
-  @Override
-  public boolean isExternalReport()
-  {
-    return true;
-  }
-
-  @Override
-  protected void executeReport(final Locale locale)
-    throws MavenReportException
-  {
-    throw new MavenReportException(
-      "Should not execute report, generate(...) is overridden");
-  }
 
   /**
    * {@inheritDoc}
@@ -256,7 +229,7 @@ public class SchemaCrawlerMojo
   @Override
   public String getOutputName()
   {
-    return "schemacrawler";
+    return "schemacrawler-report";
   }
 
   /**
@@ -281,6 +254,74 @@ public class SchemaCrawlerMojo
     return getName(locale);
   }
 
+  @Override
+  protected void executeReport(final Locale locale)
+    throws MavenReportException
+  {
+    try
+    {
+      final Path outputFile = executeSchemaCrawler();
+      final Path reportFile = Paths
+        .get(getOutputDirectory(), getOutputFilename())
+        .toAbsolutePath();
+
+      Files.move(outputFile, reportFile, REPLACE_EXISTING);
+
+      // Get the Maven Doxia Sink, which will be used to generate the
+      // various elements of the document
+      Sink mainSink = getSink();
+      if (mainSink == null)
+      {
+        throw new MavenReportException("Could not get the Doxia sink");
+      }
+
+      // Page title
+      mainSink.head();
+      mainSink.title();
+      mainSink.text(getName(Locale.getDefault()));
+      mainSink.title_();
+      mainSink.head_();
+
+      mainSink.body();
+
+      // Heading 1
+      mainSink.section1();
+      mainSink.sectionTitle1();
+      mainSink.text(getName(Locale.getDefault()));
+      mainSink.sectionTitle1_();
+
+      // Content
+      mainSink.paragraph();
+      mainSink.link(getOutputFilename());
+      mainSink.text(title);
+      mainSink.link_();
+      mainSink.paragraph_();
+
+      // Close
+      mainSink.section1_();
+      mainSink.body_();
+    }
+    catch (final Exception e)
+    {
+      throw new MavenReportException("Error executing SchemaCrawler report", e);
+    }
+  }
+
+  private String getOutputFilename()
+  {
+    if (outputfile == null || StringUtils.isBlank(outputfile))
+    {
+      return String.format("schemacrawler-output.%s", outputformat);
+    }
+    else
+    {
+      return Paths
+        .get(outputfile)
+        .getFileName()
+        .toString();
+    }
+  }
+
   /**
    * Load configuration files, and add in other configuration options.
    *
@@ -291,8 +332,17 @@ public class SchemaCrawlerMojo
     final Config textOptionsConfig = createSchemaTextOptions();
     try
     {
-      final Config additionalConfiguration = PropertiesUtility
-        .loadConfig(new FileInputResource(Paths.get(config)));
+      final Config additionalConfiguration;
+      if (config != null)
+      {
+        final Path configPath = config.toPath();
+        additionalConfiguration =
+          PropertiesUtility.loadConfig(new FileInputResource(configPath));
+      }
+      else
+      {
+        additionalConfiguration = new Config();
+      }
       additionalConfiguration.putAll(textOptionsConfig);
       return additionalConfiguration;
     }
@@ -305,24 +355,11 @@ public class SchemaCrawlerMojo
     }
   }
 
-  private DataSource createDataSource()
-  {
-    final BasicDataSource dataSource = new BasicDataSource();
-    dataSource.setUsername(user);
-    dataSource.setPassword(password);
-    dataSource.setUrl(url);
-    dataSource.setDefaultAutoCommit(false);
-    dataSource.setInitialSize(1);
-    dataSource.setMaxTotal(1);
-
-    return dataSource;
-  }
-
   private OutputOptions createOutputOptions(final Path outputFile)
   {
-    final OutputOptionsBuilder outputOptionsBuilder = OutputOptionsBuilder
-      .builder();
-    outputOptionsBuilder.withOutputFormatValue(getOutputFormat().getFormat());
+    final OutputOptionsBuilder outputOptionsBuilder =
+      OutputOptionsBuilder.builder();
+    outputOptionsBuilder.withOutputFormatValue(outputformat);
     outputOptionsBuilder.withOutputFile(outputFile);
     outputOptionsBuilder.title(title);
     return outputOptionsBuilder.toOptions();
@@ -337,10 +374,10 @@ public class SchemaCrawlerMojo
   {
     final Log logger = getLog();
 
-    final LimitOptionsBuilder limitOptionsBuilder = LimitOptionsBuilder
-      .builder();
-    final SchemaCrawlerOptionsBuilder optionsBuilder = SchemaCrawlerOptionsBuilder
-      .builder();
+    final LimitOptionsBuilder limitOptionsBuilder =
+      LimitOptionsBuilder.builder();
+    final SchemaCrawlerOptionsBuilder optionsBuilder =
+      SchemaCrawlerOptionsBuilder.builder();
 
     limitOptionsBuilder.tableTypes(tableTypes);
 
@@ -349,14 +386,14 @@ public class SchemaCrawlerMojo
     {
       try
       {
-        loadOptionsBuilder.withSchemaInfoLevel(InfoLevel.valueOf(infolevel)
-                                             .toSchemaInfoLevel());
+        loadOptionsBuilder.withSchemaInfoLevel(InfoLevel
+                                                 .valueOf(infolevel)
+                                                 .toSchemaInfoLevel());
       }
       catch (final Exception e)
       {
         logger.info("Unknown infolevel - using 'standard': " + infolevel);
-        loadOptionsBuilder
-          .withSchemaInfoLevel(InfoLevel.standard.toSchemaInfoLevel());
+        loadOptionsBuilder.withSchemaInfoLevel(InfoLevel.standard.toSchemaInfoLevel());
       }
     }
     optionsBuilder.withLoadOptionsBuilder(loadOptionsBuilder);
@@ -370,24 +407,25 @@ public class SchemaCrawlerMojo
     limitOptionsBuilder.includeSequences(new RegularExpressionRule(defaultString(
       sequences,
       INCLUDE_ALL), INCLUDE_NONE));
-    limitOptionsBuilder.includeTables(new RegularExpressionRule(defaultString(tables,
-                                                                         INCLUDE_ALL),
-                                                           INCLUDE_NONE));
+    limitOptionsBuilder.includeTables(new RegularExpressionRule(defaultString(
+      tables,
+      INCLUDE_ALL), INCLUDE_NONE));
     limitOptionsBuilder.includeRoutines(new RegularExpressionRule(defaultString(
       routines,
       INCLUDE_ALL), INCLUDE_NONE));
 
     limitOptionsBuilder.includeColumns(new RegularExpressionRule(INCLUDE_ALL,
-                                                            defaultString(
-                                                              excludecolumns,
-                                                              INCLUDE_NONE)));
+                                                                 defaultString(
+                                                                   excludecolumns,
+                                                                   INCLUDE_NONE)));
     limitOptionsBuilder.includeRoutineParameters(new RegularExpressionRule(
       INCLUDE_ALL,
       defaultString(excludeparameters, INCLUDE_NONE)));
 
     if (noemptytables)
     {
-      final FilterOptionsBuilder filterOptionsBuilder = FilterOptionsBuilder.builder()
+      final FilterOptionsBuilder filterOptionsBuilder = FilterOptionsBuilder
+        .builder()
         .noEmptyTables();
       optionsBuilder.withFilterOptionsBuilder(filterOptionsBuilder);
     }
@@ -399,8 +437,8 @@ public class SchemaCrawlerMojo
 
   private Config createSchemaTextOptions()
   {
-    final SchemaTextOptionsBuilder textOptionsBuilder = SchemaTextOptionsBuilder
-      .builder();
+    final SchemaTextOptionsBuilder textOptionsBuilder =
+      SchemaTextOptionsBuilder.builder();
 
     textOptionsBuilder.noInfo(noinfo);
     textOptionsBuilder.noRemarks(noremarks);
@@ -419,51 +457,30 @@ public class SchemaCrawlerMojo
   {
     final Log logger = getLog();
 
-    final SchemaCrawlerOptions schemaCrawlerOptions = createSchemaCrawlerOptions();
-    final DataSource dataSource = createDataSource();
+    final SchemaCrawlerOptions schemaCrawlerOptions =
+      createSchemaCrawlerOptions();
     final Config additionalConfiguration = createAdditionalConfiguration();
-    final Path outputFile = Files
-      .createTempFile("schemacrawler.report.", ".data");
+    final Path outputFile =
+      Files.createTempFile("schemacrawler.report.", ".data");
     final OutputOptions outputOptions = createOutputOptions(outputFile);
 
-    final SchemaCrawlerExecutable executable = new SchemaCrawlerExecutable(
-      command);
+    final SchemaCrawlerExecutable executable =
+      new SchemaCrawlerExecutable(command);
     executable.setOutputOptions(outputOptions);
     executable.setSchemaCrawlerOptions(schemaCrawlerOptions);
     executable.setAdditionalConfiguration(additionalConfiguration);
 
     logger.debug(ObjectToString.toString(executable));
-    final Connection connection = dataSource.getConnection();
-    final SchemaRetrievalOptions schemaRetrievalOptions = SchemaCrawlerUtility
-      .matchSchemaRetrievalOptions(connection);
+    final Connection connection =
+      DriverManager.getConnection(url, user, password);
+    final SchemaRetrievalOptions schemaRetrievalOptions =
+      SchemaCrawlerUtility.matchSchemaRetrievalOptions(connection);
     executable.setConnection(connection);
     executable.setSchemaRetrievalOptions(schemaRetrievalOptions);
 
     executable.execute();
 
     return outputFile;
-  }
-
-  private OutputFormat getOutputFormat()
-  {
-    final OutputFormat outputFormat;
-    if (isBlank(outputformat))
-    {
-      outputFormat = TextOutputFormat.html;
-    }
-    else if (TextOutputFormat.isSupportedFormat(outputformat))
-    {
-      outputFormat = TextOutputFormat.fromFormat(outputformat);
-    }
-    else if (DiagramOutputFormat.isSupportedFormat(outputformat))
-    {
-      outputFormat = DiagramOutputFormat.fromFormat(outputformat);
-    }
-    else
-    {
-      outputFormat = TextOutputFormat.html;
-    }
-    return outputFormat;
   }
 
 }

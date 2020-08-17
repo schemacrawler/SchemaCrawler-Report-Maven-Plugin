@@ -52,13 +52,13 @@ import schemacrawler.schemacrawler.SchemaCrawlerOptions;
 import schemacrawler.schemacrawler.SchemaCrawlerOptionsBuilder;
 import schemacrawler.schemacrawler.SchemaRetrievalOptions;
 import schemacrawler.tools.executable.SchemaCrawlerExecutable;
-import schemacrawler.tools.iosource.FileInputResource;
 import schemacrawler.tools.options.OutputOptions;
 import schemacrawler.tools.options.OutputOptionsBuilder;
 import schemacrawler.tools.text.schema.SchemaTextOptionsBuilder;
 import schemacrawler.utility.PropertiesUtility;
 import schemacrawler.utility.SchemaCrawlerUtility;
-import sf.util.ObjectToString;
+import us.fatehi.utility.ObjectToString;
+import us.fatehi.utility.ioresource.FileInputResource;
 
 /**
  * Generates a SchemaCrawler report of the database.
@@ -327,32 +327,30 @@ public class SchemaCrawlerMojo
    *
    * @return SchemaCrawler command configuration
    */
-  private Config createAdditionalConfiguration()
+  private Config loadBaseConfiguration()
   {
-    final Config textOptionsConfig = createSchemaTextOptions();
+    Config baseConfiguration;
     try
     {
-      final Config additionalConfiguration;
       if (config != null)
       {
         final Path configPath = config.toPath();
-        additionalConfiguration =
+        baseConfiguration =
           PropertiesUtility.loadConfig(new FileInputResource(configPath));
       }
       else
       {
-        additionalConfiguration = new Config();
+        baseConfiguration = new Config();
       }
-      additionalConfiguration.putAll(textOptionsConfig);
-      return additionalConfiguration;
     }
     catch (final IOException e)
     {
       final Log logger = getLog();
       logger.debug(e.getMessage());
 
-      return textOptionsConfig;
+      baseConfiguration = new Config();
     }
+    return baseConfiguration;
   }
 
   private OutputOptions createOutputOptions(final Path outputFile)
@@ -370,34 +368,41 @@ public class SchemaCrawlerMojo
    *
    * @return SchemaCrawlerOptions
    */
-  private SchemaCrawlerOptions createSchemaCrawlerOptions()
+  private SchemaCrawlerOptions createSchemaCrawlerOptions(final Config baseConfiguration)
   {
-    final Log logger = getLog();
-
-    final LimitOptionsBuilder limitOptionsBuilder =
-      LimitOptionsBuilder.builder();
     final SchemaCrawlerOptionsBuilder optionsBuilder =
-      SchemaCrawlerOptionsBuilder.builder();
+      SchemaCrawlerOptionsBuilder
+        .builder()
+        .fromConfig(baseConfiguration);
+
+    createLoadOptions(baseConfiguration, optionsBuilder);
+    createLimitOptions(baseConfiguration, optionsBuilder);
+    createFilterOptions(baseConfiguration, optionsBuilder);
+
+    return optionsBuilder.toOptions();
+  }
+
+  private void createFilterOptions(final Config baseConfiguration,
+                                   final SchemaCrawlerOptionsBuilder optionsBuilder)
+  {
+    if (noemptytables)
+    {
+      final FilterOptionsBuilder filterOptionsBuilder = FilterOptionsBuilder
+        .builder()
+        .fromConfig(baseConfiguration)
+        .noEmptyTables();
+      optionsBuilder.withFilterOptionsBuilder(filterOptionsBuilder);
+    }
+  }
+
+  private void createLimitOptions(final Config baseConfiguration,
+                                  final SchemaCrawlerOptionsBuilder optionsBuilder)
+  {
+    final LimitOptionsBuilder limitOptionsBuilder = LimitOptionsBuilder
+      .builder()
+      .fromConfig(baseConfiguration);
 
     limitOptionsBuilder.tableTypes(tableTypes);
-
-    final LoadOptionsBuilder loadOptionsBuilder = LoadOptionsBuilder.builder();
-    if (!isBlank(infolevel))
-    {
-      try
-      {
-        loadOptionsBuilder.withSchemaInfoLevel(InfoLevel
-                                                 .valueOf(infolevel)
-                                                 .toSchemaInfoLevel());
-      }
-      catch (final Exception e)
-      {
-        logger.info("Unknown infolevel - using 'standard': " + infolevel);
-        loadOptionsBuilder.withSchemaInfoLevel(InfoLevel.standard.toSchemaInfoLevel());
-      }
-    }
-    optionsBuilder.withLoadOptionsBuilder(loadOptionsBuilder);
-
     limitOptionsBuilder.includeSchemas(new RegularExpressionRule(defaultString(
       schemas,
       INCLUDE_ALL), INCLUDE_NONE));
@@ -422,23 +427,38 @@ public class SchemaCrawlerMojo
       INCLUDE_ALL,
       defaultString(excludeparameters, INCLUDE_NONE)));
 
-    if (noemptytables)
-    {
-      final FilterOptionsBuilder filterOptionsBuilder = FilterOptionsBuilder
-        .builder()
-        .noEmptyTables();
-      optionsBuilder.withFilterOptionsBuilder(filterOptionsBuilder);
-    }
-
     optionsBuilder.withLimitOptionsBuilder(limitOptionsBuilder);
-
-    return optionsBuilder.toOptions();
   }
 
-  private Config createSchemaTextOptions()
+  private void createLoadOptions(final Config baseConfiguration,
+                                 final SchemaCrawlerOptionsBuilder optionsBuilder)
   {
-    final SchemaTextOptionsBuilder textOptionsBuilder =
-      SchemaTextOptionsBuilder.builder();
+    final Log logger = getLog();
+    final LoadOptionsBuilder loadOptionsBuilder = LoadOptionsBuilder
+      .builder()
+      .fromConfig(baseConfiguration);
+    if (!isBlank(infolevel))
+    {
+      try
+      {
+        loadOptionsBuilder.withSchemaInfoLevel(InfoLevel
+                                                 .valueOf(infolevel)
+                                                 .toSchemaInfoLevel());
+      }
+      catch (final Exception e)
+      {
+        logger.info("Unknown infolevel - using 'standard': " + infolevel);
+        loadOptionsBuilder.withSchemaInfoLevel(InfoLevel.standard.toSchemaInfoLevel());
+      }
+    }
+    optionsBuilder.withLoadOptionsBuilder(loadOptionsBuilder);
+  }
+
+  private Config createSchemaTextOptionsConfiguration(final Config baseConfiguration)
+  {
+    final SchemaTextOptionsBuilder textOptionsBuilder = SchemaTextOptionsBuilder
+      .builder()
+      .fromConfig(baseConfiguration);
 
     textOptionsBuilder.noInfo(noinfo);
     textOptionsBuilder.noRemarks(noremarks);
@@ -457,13 +477,24 @@ public class SchemaCrawlerMojo
   {
     final Log logger = getLog();
 
+    // 1. Load base configuration
+    final Config baseConfiguration = loadBaseConfiguration();
+
+    // 2. Create SchemaCrawler options from base configuration, and
+    // plugin configuration options
     final SchemaCrawlerOptions schemaCrawlerOptions =
-      createSchemaCrawlerOptions();
-    final Config additionalConfiguration = createAdditionalConfiguration();
+      createSchemaCrawlerOptions(baseConfiguration);
+
+    // 3. Load additional configuration for schema text options
+    final Config additionalConfiguration =
+      createSchemaTextOptionsConfiguration(baseConfiguration);
+
+    // 4. Create output options for output into a temporary file
     final Path outputFile =
       Files.createTempFile("schemacrawler.report.", ".data");
     final OutputOptions outputOptions = createOutputOptions(outputFile);
 
+    // 5. Execute SchemaCrawler
     final SchemaCrawlerExecutable executable =
       new SchemaCrawlerExecutable(command);
     executable.setOutputOptions(outputOptions);

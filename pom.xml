@@ -361,7 +361,7 @@
                 <driver>org.hsqldb.jdbc.JDBCDriver</driver>
                 <url>jdbc:hsqldb:file:${project.build.directory}/hsqldb/sample;shutdown=true</url>
                 <user>sa</user>
-                <password/>
+                <password />
               </configuration>
             </plugin>
           </reportPlugins>

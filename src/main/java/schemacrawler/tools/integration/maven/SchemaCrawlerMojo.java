@@ -460,13 +460,32 @@ public class SchemaCrawlerMojo
       .builder()
       .fromConfig(baseConfiguration);
 
-    textOptionsBuilder.noInfo(noinfo);
-    textOptionsBuilder.noRemarks(noremarks);
-    textOptionsBuilder.portableNames(portablenames);
+    // IMPORTANT: Only set boolean values if true, to prevent overwriting defaults
+    if (noinfo)
+    {
+      textOptionsBuilder.noInfo();
+    }
+    if (noremarks)
+    {
+      textOptionsBuilder.noRemarks();
+    }
+    if (portablenames)
+    {
+      textOptionsBuilder.portableNames();
+    }
 
-    textOptionsBuilder.sortTables(sorttables);
-    textOptionsBuilder.sortTableColumns(sortcolumns);
-    textOptionsBuilder.sortRoutineParameters(sortparameters);
+    if (sorttables)
+    {
+      textOptionsBuilder.sortTables();
+    }
+    if (sortcolumns)
+    {
+      textOptionsBuilder.sortTableColumns();
+    }
+    if (sortparameters)
+    {
+      textOptionsBuilder.sortRoutineParameters();
+    }
 
     final Config textOptionsConfig = textOptionsBuilder.toConfig();
     return textOptionsConfig;

@@ -515,8 +515,11 @@ public class SchemaCrawlerMojo
       createSchemaCrawlerOptions(baseConfiguration);
 
     // 3. Load additional configuration for schema text options
-    final Config additionalConfiguration =
-      createSchemaTextOptionsConfiguration(baseConfiguration);
+    final Config schemaTextOptionsConfiguration =
+        createSchemaTextOptionsConfiguration(baseConfiguration);
+    // and build additional configuration
+    final Config additionalConfiguration = new Config(baseConfiguration);
+    additionalConfiguration.putAll(schemaTextOptionsConfiguration);
 
     // 4. Create output options for output into a temporary file
     final Path outputFile =

@@ -103,6 +103,12 @@ public class SchemaCrawlerMojo
   @Parameter(property = "infolevel", defaultValue = "standard", required = true)
   private String infolevel;
   /**
+   * The info level determines the amount of database metadata retrieved, and
+   * also determines the time taken to crawl the schema.
+   */
+  @Parameter(property = "loadrowcounts", defaultValue = "false")
+  private boolean loadrowcounts;
+  /**
    * Whether to hide tables with no data.
    */
   @Parameter(property = "noemptytables", defaultValue = "false")
@@ -450,6 +456,10 @@ public class SchemaCrawlerMojo
         logger.info("Unknown infolevel - using 'standard': " + infolevel);
         loadOptionsBuilder.withSchemaInfoLevel(InfoLevel.standard.toSchemaInfoLevel());
       }
+    }
+    if (loadrowcounts)
+    {
+      loadOptionsBuilder.loadRowCounts();
     }
     optionsBuilder.withLoadOptionsBuilder(loadOptionsBuilder);
   }

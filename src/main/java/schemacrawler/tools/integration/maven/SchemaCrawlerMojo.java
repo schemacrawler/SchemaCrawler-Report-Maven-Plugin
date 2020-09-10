@@ -20,20 +20,20 @@
 package schemacrawler.tools.integration.maven;
 
 
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-import static org.apache.commons.lang.StringUtils.defaultString;
 import static org.apache.commons.lang.StringUtils.isBlank;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.Connection;
-import java.sql.DriverManager;
+import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.UUID;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.doxia.sink.Sink;
@@ -42,23 +42,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.reporting.AbstractMavenReport;
 import org.apache.maven.reporting.MavenReportException;
-import schemacrawler.inclusionrule.RegularExpressionRule;
-import schemacrawler.schemacrawler.Config;
-import schemacrawler.schemacrawler.FilterOptionsBuilder;
-import schemacrawler.schemacrawler.InfoLevel;
-import schemacrawler.schemacrawler.LimitOptionsBuilder;
-import schemacrawler.schemacrawler.LoadOptionsBuilder;
-import schemacrawler.schemacrawler.SchemaCrawlerOptions;
-import schemacrawler.schemacrawler.SchemaCrawlerOptionsBuilder;
-import schemacrawler.schemacrawler.SchemaRetrievalOptions;
-import schemacrawler.tools.executable.SchemaCrawlerExecutable;
-import schemacrawler.tools.options.OutputOptions;
-import schemacrawler.tools.options.OutputOptionsBuilder;
-import schemacrawler.tools.text.schema.SchemaTextOptionsBuilder;
-import schemacrawler.utility.PropertiesUtility;
-import schemacrawler.utility.SchemaCrawlerUtility;
-import us.fatehi.utility.ObjectToString;
-import us.fatehi.utility.ioresource.FileInputResource;
+import schemacrawler.Main;
 
 /**
  * Generates a SchemaCrawler report of the database.
@@ -67,9 +51,13 @@ import us.fatehi.utility.ioresource.FileInputResource;
 public class SchemaCrawlerMojo
   extends AbstractMavenReport
 {
-
-  private static final String INCLUDE_ALL = ".*";
-  private static final String INCLUDE_NONE = "";
+  
+  /**
+   * Log level for SchemaCrawler. One of 
+   * [OFF, SEVERE, WARNING, INFO, CONFIG, FINE, FINER, FINEST, ALL]
+   */
+  @Parameter(property = "loglevel", defaultValue = "OFF")
+  private String loglevel;
   /**
    * SchemaCrawler command.
    */
@@ -88,13 +76,13 @@ public class SchemaCrawlerMojo
    * .*\.STREET|.*\.PRICE matches columns named STREET or PRICE in any table
    * Columns that match the pattern are not displayed
    */
-  @Parameter(property = "excludecolumns", defaultValue = INCLUDE_NONE)
+  @Parameter(property = "excludecolumns")
   private String excludecolumns;
   /**
    * Regular expression to match fully qualified parameter names. Parameters
    * that match the pattern are not displayed
    */
-  @Parameter(property = "excludeparameters", defaultValue = INCLUDE_NONE)
+  @Parameter(property = "excludeparameters")
   private String excludeparameters;
   /**
    * The info level determines the amount of database metadata retrieved, and
@@ -157,12 +145,12 @@ public class SchemaCrawlerMojo
    * matches any routines whose names start with C or P Routines that do not
    * match the pattern are not displayed
    */
-  @Parameter(property = "routines", defaultValue = INCLUDE_ALL)
+  @Parameter(property = "routines")
   private String routines;
   /**
    * Schemas to include.
    */
-  @Parameter(property = "schemas", defaultValue = INCLUDE_ALL)
+  @Parameter(property = "schemas")
   private String schemas;
   /**
    * Regular expression to match fully qualified sequence names, in the form
@@ -170,7 +158,7 @@ public class SchemaCrawlerMojo
    * .*\..*\.C.*|.*\..*\.P.* Sequences that do not match the pattern are not
    * displayed.
    */
-  @Parameter(property = "sequences", defaultValue = INCLUDE_ALL)
+  @Parameter(property = "sequences")
   private String sequences;
   /**
    * Sort columns in a table alphabetically.
@@ -192,7 +180,7 @@ public class SchemaCrawlerMojo
    * "CATALOGNAME.SCHEMANAME.SYNONYMNAME" - for example, .*\..*\.C.*|.*\..*\.P.*
    * Synonyms that do not match the pattern are not displayed.
    */
-  @Parameter(property = "synonyms", defaultValue = INCLUDE_ALL)
+  @Parameter(property = "synonyms")
   private String synonyms;
   /**
    * Comma-separated list of table types of TABLE,VIEW,SYSTEM_TABLE,GLOBAL_TEMPORARY,LOCAL_TEMPORARY,ALIAS
@@ -205,7 +193,7 @@ public class SchemaCrawlerMojo
    * "CATALOGNAME.SCHEMANAME.TABLENAME" - for example, .*\..*\.C.*|.*\..*\.P.*
    * Tables that do not match the pattern are not displayed.
    */
-  @Parameter(property = "tables", defaultValue = INCLUDE_ALL)
+  @Parameter(property = "tables")
   private String tables;
   /**
    * Title for the SchemaCrawler Report.
@@ -269,9 +257,11 @@ public class SchemaCrawlerMojo
       final Path outputFile = executeSchemaCrawler();
       final Path reportFile = Paths
         .get(getOutputDirectory(), getOutputFilename())
-        .toAbsolutePath();
+        .toAbsolutePath();     
 
-      Files.move(outputFile, reportFile, REPLACE_EXISTING);
+      Files.move(outputFile, reportFile, StandardCopyOption.REPLACE_EXISTING);
+      final Log logger = getLog();
+      logger.info("Generated SchemaCrawler report, " + reportFile);
 
       // Get the Maven Doxia Sink, which will be used to generate the
       // various elements of the document
@@ -328,220 +318,150 @@ public class SchemaCrawlerMojo
     }
   }
 
-  /**
-   * Load configuration files, and add in other configuration options.
-   *
-   * @return SchemaCrawler command configuration
-   */
-  private Config loadBaseConfiguration()
+  private Path executeSchemaCrawler() 
+      throws Exception
   {
-    Config baseConfiguration;
-    try
+
+    final Map<String, String> argsMap = new HashMap<>();
+
+    if (config != null)
     {
-      if (config != null)
-      {
-        final Path configPath = config.toPath();
-        baseConfiguration =
-          PropertiesUtility.loadConfig(new FileInputResource(configPath));
-      }
-      else
-      {
-        baseConfiguration = new Config();
-      }
+      final Path configPath = config.toPath().toAbsolutePath();
+      argsMap.put("--config-file", configPath.toString());
     }
-    catch (final IOException e)
-    {
-      final Log logger = getLog();
-      logger.debug(e.getMessage());
 
-      baseConfiguration = new Config();
-    }
-    return baseConfiguration;
-  }
-
-  private OutputOptions createOutputOptions(final Path outputFile)
-  {
-    final OutputOptionsBuilder outputOptionsBuilder =
-      OutputOptionsBuilder.builder();
-    outputOptionsBuilder.withOutputFormatValue(outputformat);
-    outputOptionsBuilder.withOutputFile(outputFile);
-    outputOptionsBuilder.title(title);
-    return outputOptionsBuilder.toOptions();
-  }
-
-  /**
-   * Defensively set SchemaCrawlerOptions.
-   *
-   * @return SchemaCrawlerOptions
-   */
-  private SchemaCrawlerOptions createSchemaCrawlerOptions(final Config baseConfiguration)
-  {
-    final SchemaCrawlerOptionsBuilder optionsBuilder =
-      SchemaCrawlerOptionsBuilder
-        .builder()
-        .fromConfig(baseConfiguration);
-
-    createLoadOptions(baseConfiguration, optionsBuilder);
-    createLimitOptions(baseConfiguration, optionsBuilder);
-    createFilterOptions(baseConfiguration, optionsBuilder);
-
-    return optionsBuilder.toOptions();
-  }
-
-  private void createFilterOptions(final Config baseConfiguration,
-                                   final SchemaCrawlerOptionsBuilder optionsBuilder)
-  {
-    if (noemptytables)
-    {
-      final FilterOptionsBuilder filterOptionsBuilder = FilterOptionsBuilder
-        .builder()
-        .fromConfig(baseConfiguration)
-        .noEmptyTables();
-      optionsBuilder.withFilterOptionsBuilder(filterOptionsBuilder);
-    }
-  }
-
-  private void createLimitOptions(final Config baseConfiguration,
-                                  final SchemaCrawlerOptionsBuilder optionsBuilder)
-  {
-    final LimitOptionsBuilder limitOptionsBuilder = LimitOptionsBuilder
-      .builder()
-      .fromConfig(baseConfiguration);
-
-    limitOptionsBuilder.tableTypes(tableTypes);
-    limitOptionsBuilder.includeSchemas(new RegularExpressionRule(defaultString(
-      schemas,
-      INCLUDE_ALL), INCLUDE_NONE));
-    limitOptionsBuilder.includeSynonyms(new RegularExpressionRule(defaultString(
-      synonyms,
-      INCLUDE_ALL), INCLUDE_NONE));
-    limitOptionsBuilder.includeSequences(new RegularExpressionRule(defaultString(
-      sequences,
-      INCLUDE_ALL), INCLUDE_NONE));
-    limitOptionsBuilder.includeTables(new RegularExpressionRule(defaultString(
-      tables,
-      INCLUDE_ALL), INCLUDE_NONE));
-    limitOptionsBuilder.includeRoutines(new RegularExpressionRule(defaultString(
-      routines,
-      INCLUDE_ALL), INCLUDE_NONE));
-
-    limitOptionsBuilder.includeColumns(new RegularExpressionRule(INCLUDE_ALL,
-                                                                 defaultString(
-                                                                   excludecolumns,
-                                                                   INCLUDE_NONE)));
-    limitOptionsBuilder.includeRoutineParameters(new RegularExpressionRule(
-      INCLUDE_ALL,
-      defaultString(excludeparameters, INCLUDE_NONE)));
-
-    optionsBuilder.withLimitOptionsBuilder(limitOptionsBuilder);
-  }
-
-  private void createLoadOptions(final Config baseConfiguration,
-                                 final SchemaCrawlerOptionsBuilder optionsBuilder)
-  {
-    final Log logger = getLog();
-    final LoadOptionsBuilder loadOptionsBuilder = LoadOptionsBuilder
-      .builder()
-      .fromConfig(baseConfiguration);
+    // Load command
     if (!isBlank(infolevel))
     {
-      try
-      {
-        loadOptionsBuilder.withSchemaInfoLevel(InfoLevel
-                                                 .valueOf(infolevel)
-                                                 .toSchemaInfoLevel());
-      }
-      catch (final Exception e)
-      {
-        logger.info("Unknown infolevel - using 'standard': " + infolevel);
-        loadOptionsBuilder.withSchemaInfoLevel(InfoLevel.standard.toSchemaInfoLevel());
-      }
+      argsMap.put("--info-level", infolevel);
     }
     if (loadrowcounts)
     {
-      loadOptionsBuilder.loadRowCounts();
+      argsMap.put("--load-row-counts", Boolean.TRUE.toString());
     }
-    optionsBuilder.withLoadOptionsBuilder(loadOptionsBuilder);
-  }
 
-  private Config createSchemaTextOptionsConfiguration(final Config baseConfiguration)
-  {
-    final SchemaTextOptionsBuilder textOptionsBuilder = SchemaTextOptionsBuilder
-      .builder()
-      .fromConfig(baseConfiguration);
+    // Limit command
+    if (!isBlank(tableTypes))
+    {
+      argsMap.put("--table-types", tableTypes);
+    }
+    if (schemas != null)
+    {
+      argsMap.put("--schemas", schemas);
+    }
+    if (synonyms != null)
+    {
+      argsMap.put("--synonyms", synonyms);
+    }
+    if (sequences != null)
+    {
+      argsMap.put("--sequences", sequences);
+    }
+    if (tables != null)
+    {
+      argsMap.put("--tables", tables);
+    }
+    if (routines != null)
+    {
+      argsMap.put("--routines", routines);
+    }
+    if (excludecolumns != null)
+    {
+      argsMap.put("--excludecolumns", excludecolumns);
+    }
+    if (excludeparameters != null)
+    {
+      argsMap.put("--excludeparameters", excludeparameters);
+    }
 
-    // IMPORTANT: Only set boolean values if true, to prevent overwriting defaults
+    // Filter command
+    if (noemptytables)
+    {
+      argsMap.put("--no-empty-tables", Boolean.TRUE.toString());
+    }
+
+    // Show command
     if (noinfo)
     {
-      textOptionsBuilder.noInfo();
+      argsMap.put("--no-info", Boolean.TRUE.toString());
     }
     if (noremarks)
     {
-      textOptionsBuilder.noRemarks();
+      argsMap.put("--no-remarks", Boolean.TRUE.toString());
     }
     if (portablenames)
     {
-      textOptionsBuilder.portableNames();
+      argsMap.put("--portable-names", Boolean.TRUE.toString());
     }
 
+    // Sort command
     if (sorttables)
     {
-      textOptionsBuilder.sortTables();
+      argsMap.put("--sort-tables", Boolean.TRUE.toString());
     }
     if (sortcolumns)
     {
-      textOptionsBuilder.sortTableColumns();
+      argsMap.put("--sort-columns", Boolean.TRUE.toString());
     }
     if (sortparameters)
     {
-      textOptionsBuilder.sortRoutineParameters();
+      argsMap.put("--sort-parameters", Boolean.TRUE.toString());
     }
+       
+    // Connect command
+    argsMap.put("--url", url);
+    argsMap.put("--user", user);
+    if (password != null) {
+      argsMap.put("--password", password);
+    }
+   
+    // Log command
+    argsMap.put("--log-level", loglevel);
+    
+    // Execute command
+    if (!isBlank(title))
+    {
+      argsMap.put("--title", title);
+    }
+    if (!isBlank(outputformat))
+    {
+      argsMap.put("--output-format", outputformat);
+    }
+    if (!isBlank(outputformat))
+    {
+      argsMap.put("--output-format", outputformat);
+    }
+    
+    if (!isBlank(command))
+    {
+      argsMap.put("--command", command);
+    }
+    
+    // Output into a temporary file
+    final Path outputFile = Paths
+        .get(System.getProperty("java.io.tmpdir"), UUID.randomUUID().toString())
+        .toAbsolutePath().normalize();
+    argsMap.put("--output-file", outputFile.toString());
 
-    final Config textOptionsConfig = textOptionsBuilder.toConfig();
-    return textOptionsConfig;
-  }
+    // Build command-line
+    final List<String> argsList = new ArrayList<>();
+    for (final Entry<String, String> entry : argsMap.entrySet())
+    {
+      argsList.add(entry.getKey());
+      argsList.add(entry.getValue());
+    }
+    final String[] args = argsList.toArray(new String[0]);
 
-  private Path executeSchemaCrawler()
-    throws Exception
-  {
     final Log logger = getLog();
+    logger.info("Executing SchemaCrawler with: " + argsMap);
 
-    // 1. Load base configuration
-    final Config baseConfiguration = loadBaseConfiguration();
-
-    // 2. Create SchemaCrawler options from base configuration, and
-    // plugin configuration options
-    final SchemaCrawlerOptions schemaCrawlerOptions =
-      createSchemaCrawlerOptions(baseConfiguration);
-
-    // 3. Load additional configuration for schema text options
-    final Config schemaTextOptionsConfiguration =
-        createSchemaTextOptionsConfiguration(baseConfiguration);
-    // and build additional configuration
-    final Config additionalConfiguration = new Config(baseConfiguration);
-    additionalConfiguration.putAll(schemaTextOptionsConfiguration);
-
-    // 4. Create output options for output into a temporary file
-    final Path outputFile =
-      Files.createTempFile("schemacrawler.report.", ".data");
-    final OutputOptions outputOptions = createOutputOptions(outputFile);
-
-    // 5. Execute SchemaCrawler
-    final SchemaCrawlerExecutable executable =
-      new SchemaCrawlerExecutable(command);
-    executable.setOutputOptions(outputOptions);
-    executable.setSchemaCrawlerOptions(schemaCrawlerOptions);
-    executable.setAdditionalConfiguration(additionalConfiguration);
-
-    logger.debug(ObjectToString.toString(executable));
-    final Connection connection =
-      DriverManager.getConnection(url, user, password);
-    final SchemaRetrievalOptions schemaRetrievalOptions =
-      SchemaCrawlerUtility.matchSchemaRetrievalOptions(connection);
-    executable.setConnection(connection);
-    executable.setSchemaRetrievalOptions(schemaRetrievalOptions);
-
-    executable.execute();
+    // Run SchemaCrawler command-line
+    Main.main(args);
+    if (!Files.isReadable(outputFile)) 
+    {
+      throw new IOException("SchemaCrawler report was not generated");
+    }
+    logger.info("Completed SchemaCrawler execution");
 
     return outputFile;
   }

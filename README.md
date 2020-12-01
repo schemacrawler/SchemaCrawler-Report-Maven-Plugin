@@ -1,7 +1,7 @@
 ![Quick Build](https://github.com/schemacrawler/SchemaCrawler-Report-Maven-Plugin/workflows/Quick%20Build/badge.svg)
 [![The Central Repository](https://img.shields.io/maven-central/v/us.fatehi/schemacrawler-maven-plugin.svg)](https://search.maven.org/search?q=g:us.fatehi%20a:schemacrawler*)
 
-<img src="https://raw.githubusercontent.com/schemacrawler/SchemaCrawler/master/schemacrawler-distrib/src/site/resources/images/schemacrawler_logo.png" height="100px" width="100px" align="right" />
+<img src="https://raw.githubusercontent.com/schemacrawler/SchemaCrawler/master/schemacrawler-website/src/site/resources/images/schemacrawler_logo.png" height="100px" width="100px" align="right" />
 
 # SchemaCrawler Report Maven Plugin
 

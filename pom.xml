@@ -5,12 +5,12 @@
   <parent>
     <artifactId>schemacrawler-parent</artifactId>
     <groupId>us.fatehi</groupId>
-    <version>16.14.5</version>
+    <version>16.14.6</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>schemacrawler-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
-  <version>16.14.5.2</version>
+  <version>16.14.6.2</version>
   <name>SchemaCrawler Report - Maven Plugin</name>
   <inceptionYear>2011</inceptionYear>
   <licenses>
@@ -45,18 +45,6 @@
     <url>https://github.com/schemacrawler/SchemaCrawler-Report-Maven-Plugin</url>
     <connection>scm:git:git://github.com/schemacrawler/SchemaCrawler-Report-Maven-Plugin.git</connection>
   </scm>
-  <distributionManagement>
-    <snapshotRepository>
-      <id>sonatype-nexus-snapshots</id>
-      <name>Sonatype Nexus Snapshots</name>
-      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-    </snapshotRepository>
-    <repository>
-      <id>sonatype-nexus</id>
-      <name>Sonatype Nexus</name>
-      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
-    </repository>
-  </distributionManagement>
   <!-- This needed so that the Plugin Documentation has the correct System
     Requirements. -->
   <prerequisites>
@@ -94,7 +82,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <skip.signing.artifacts>true</skip.signing.artifacts>
-    <schemacrawler.version>16.14.5</schemacrawler.version>
+    <schemacrawler.version>16.14.6</schemacrawler.version>
     <!-- Properties for Site documentation (may not use period)... -->
     <SchemacrawlerVersion>${schemacrawler.version}</SchemacrawlerVersion>
   </properties>
@@ -411,8 +399,10 @@
         <extensions>true</extensions>
         <configuration>
           <serverId>sonatype-nexus</serverId>
-          <nexusUrl>https://oss.sonatype.org</nexusUrl>
+          <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
           <autoReleaseAfterClose>true</autoReleaseAfterClose>
+          <keepStagingRepositoryOnFailure>true</keepStagingRepositoryOnFailure>
+          <keepStagingRepositoryOnCloseRuleFailure>true</keepStagingRepositoryOnCloseRuleFailure>
         </configuration>
       </plugin>
     </plugins>

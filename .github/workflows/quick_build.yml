@@ -20,4 +20,4 @@ jobs:
         mvn \
           --no-transfer-progress \
           --batch-mode \
-          package
+          integration-test package

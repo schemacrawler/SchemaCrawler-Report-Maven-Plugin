@@ -54,7 +54,7 @@
     <dependency>
       <groupId>org.apache.maven.plugin-tools</groupId>
       <artifactId>maven-plugin-annotations</artifactId>
-      <version>3.6.1</version>
+      <version>3.6.4</version>
       <scope>provided</scope>
     </dependency>
     <!-- SchemaCrawler Maven reporting commandline -->
@@ -106,7 +106,7 @@
     <schemacrawler.version>16.16.11</schemacrawler.version>
     <!-- Properties for Site documentation (may not use period)... -->
     <SchemacrawlerVersion>${schemacrawler.version}</SchemacrawlerVersion>
-    <doxiaVersion>1.9.1</doxiaVersion>
+    <doxiaVersion>1.11.1</doxiaVersion>
   </properties>
   <build>
     <!-- Best practice is to control the commandline versions to ensure reproducibility... -->
@@ -180,7 +180,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-site-plugin</artifactId>
-          <version>3.9.1</version>
+          <version>3.11.1</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -365,7 +365,7 @@
       <plugin>
         <groupId>org.liquibase</groupId>
         <artifactId>liquibase-maven-plugin</artifactId>
-        <version>4.5.0</version>
+        <version>4.8.0</version>
         <executions>
           <execution>
             <id>build.sample.hsqldb</id>

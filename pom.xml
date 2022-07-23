@@ -5,12 +5,12 @@
   <parent>
     <artifactId>schemacrawler-parent</artifactId>
     <groupId>us.fatehi</groupId>
-    <version>16.16.18</version>
+    <version>16.17.1</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>schemacrawler-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
-  <version>16.16.18.1</version>
+  <version>16.17.1.1</version>
   <name>SchemaCrawler Report - Maven Plugin</name>
   <inceptionYear>2011</inceptionYear>
   <licenses>
@@ -108,7 +108,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <skip.signing.artifacts>true</skip.signing.artifacts>
-    <schemacrawler.version>16.16.18</schemacrawler.version>
+    <schemacrawler.version>16.17.1</schemacrawler.version>
     <!-- Properties for Site documentation (may not use period)... -->
     <SchemacrawlerVersion>${schemacrawler.version}</SchemacrawlerVersion>
     <doxiaVersion>1.11.1</doxiaVersion>

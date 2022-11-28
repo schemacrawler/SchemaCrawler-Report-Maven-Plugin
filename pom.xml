@@ -108,7 +108,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <skip.signing.artifacts>true</skip.signing.artifacts>
-    <schemacrawler.version>16.19.1</schemacrawler.version>
+    <schemacrawler.version>16.19.3</schemacrawler.version>
     <!-- Properties for Site documentation (may not use period)... -->
     <SchemacrawlerVersion>${schemacrawler.version}</SchemacrawlerVersion>
     <doxiaVersion>1.11.1</doxiaVersion>

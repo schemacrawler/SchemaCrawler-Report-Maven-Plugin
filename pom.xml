@@ -15,7 +15,7 @@
   <inceptionYear>2011</inceptionYear>
   <licenses>
     <license>
-      <name>GNU Lesser General Public License Version 3.0</name>
+      <name>GNU Lesser General Public License Version 3.0</name> 
       <url>http://www.gnu.org/licenses/lgpl-3.0-standalone.html</url>
       <distribution>repo</distribution>
     </license>
@@ -108,11 +108,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <skip.signing.artifacts>true</skip.signing.artifacts>
-<<<<<<< HEAD
     <schemacrawler.version>16.19.4</schemacrawler.version>
-=======
-    <schemacrawler.version>16.19.1</schemacrawler.version>
->>>>>>> 7147680bc83fe89f794cde3df766b024ccc818af
     <!-- Properties for Site documentation (may not use period)... -->
     <SchemacrawlerVersion>${schemacrawler.version}</SchemacrawlerVersion>
     <doxiaVersion>1.11.1</doxiaVersion>

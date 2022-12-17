@@ -330,7 +330,7 @@
       <plugin>
         <groupId>org.liquibase</groupId>
         <artifactId>liquibase-maven-plugin</artifactId>
-        <version>4.17.2</version>
+        <version>4.18.0</version>
         <executions>
           <execution>
             <id>build.sample.hsqldb</id>

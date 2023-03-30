@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="https://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
     <artifactId>schemacrawler-parent</artifactId>
     <groupId>us.fatehi</groupId>
@@ -15,7 +15,7 @@
   <inceptionYear>2011</inceptionYear>
   <licenses>
     <license>
-      <name>GNU Lesser General Public License Version 3.0</name> 
+      <name>GNU Lesser General Public License Version 3.0</name>
       <url>http://www.gnu.org/licenses/lgpl-3.0-standalone.html</url>
       <distribution>repo</distribution>
     </license>
@@ -43,26 +43,95 @@
   </organization>
   <scm>
     <url>https://github.com/schemacrawler/SchemaCrawler-Report-Maven-Plugin</url>
-    <connection>scm:git:git://github.com/schemacrawler/SchemaCrawler-Report-Maven-Plugin.git</connection>
+    <connection>
+      scm:git:git://github.com/schemacrawler/SchemaCrawler-Report-Maven-Plugin.git</connection>
   </scm>
   <!-- This needed so that the Plugin Documentation has the correct System
-    Requirements. -->
+  Requirements. -->
   <prerequisites>
     <maven>${maven.api.version}</maven>
   </prerequisites>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <skip.signing.artifacts>true</skip.signing.artifacts>
+    <schemacrawler.version>16.19.9</schemacrawler.version>
+    <!-- Properties for Site documentation (may not use period)... -->
+    <SchemacrawlerVersion>${schemacrawler.version}</SchemacrawlerVersion>
+    <doxiaVersion>1.11.1</doxiaVersion>
+    <mavenPluginVersion>3.9.1</mavenPluginVersion>
+  </properties>
   <dependencies>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-core</artifactId>
+      <version>${mavenPluginVersion}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-model</artifactId>
+      <version>${mavenPluginVersion}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-model-builder</artifactId>
+      <version>${mavenPluginVersion}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-settings</artifactId>
+      <version>${mavenPluginVersion}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-settings-builder</artifactId>
+      <version>${mavenPluginVersion}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-repository-metadata</artifactId>
+      <version>${mavenPluginVersion}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-aether-provider</artifactId>
+      <version>3.3.9</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-artifact</artifactId>
+      <version>${mavenPluginVersion}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-plugin-api</artifactId>
+      <version>${mavenPluginVersion}</version>
+      <scope>provided</scope>
+    </dependency>
     <dependency>
       <groupId>org.apache.maven.plugin-tools</groupId>
       <artifactId>maven-plugin-annotations</artifactId>
       <version>3.8.1</version>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.12.0</version>
+    </dependency>
     <!-- SchemaCrawler Maven reporting commandline -->
     <dependency>
       <groupId>org.apache.maven.reporting</groupId>
       <artifactId>maven-reporting-impl</artifactId>
-      <version>4.0.0-M4</version>
-      <scope>provided</scope>
+      <version>3.2.0</version>
     </dependency>
     <!-- Doxia -->
     <dependency>
@@ -104,17 +173,9 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <skip.signing.artifacts>true</skip.signing.artifacts>
-    <schemacrawler.version>16.19.9</schemacrawler.version>
-    <!-- Properties for Site documentation (may not use period)... -->
-    <SchemacrawlerVersion>${schemacrawler.version}</SchemacrawlerVersion>
-    <doxiaVersion>1.11.1</doxiaVersion>
-  </properties>
   <build>
-    <!-- Best practice is to control the commandline versions to ensure reproducibility... -->
+    <!-- Best practice is to control the commandline versions to ensure
+    reproducibility... -->
     <pluginManagement>
       <plugins>
         <plugin>
@@ -135,7 +196,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-deploy-plugin</artifactId>
-          <version>3.1.0</version>
+          <version>3.1.1</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -145,7 +206,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-install-plugin</artifactId>
-          <version>3.1.0</version>
+          <version>3.1.1</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -185,7 +246,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-site-plugin</artifactId>
-          <version>3.14</version>
+          <version>3.12.1</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -289,7 +350,8 @@
               <version>3.5.0</version>
               <configuration>
                 <links>
-                  <link>http://maven.apache.org/ref/3.8.3/maven-plugin-api/apidocs/</link>
+                  <link>
+                    http://maven.apache.org/ref/3.8.3/maven-plugin-api/apidocs/</link>
                   <link>http://maven.apache.org/ref/3.8.3/maven-core/apidocs/</link>
                 </links>
               </configuration>
@@ -318,7 +380,8 @@
                 <infolevel>maximum</infolevel>
                 <outputformat>html</outputformat>
                 <driver>org.hsqldb.jdbc.JDBCDriver</driver>
-                <url>jdbc:hsqldb:file:${project.build.directory}/hsqldb/sample;shutdown=true</url>
+                <url>
+                  jdbc:hsqldb:file:${project.build.directory}/hsqldb/sample;shutdown=true</url>
                 <user>sa</user>
                 <password />
               </configuration>
@@ -342,7 +405,8 @@
               <changeLogDirectory>${basedir}/src/test/resources/liquibase</changeLogDirectory>
               <changeLogFile>changelog.xml</changeLogFile>
               <driver>org.hsqldb.jdbc.JDBCDriver</driver>
-              <url>jdbc:hsqldb:file:${project.build.directory}/hsqldb/sample;shutdown=true</url>
+              <url>
+                jdbc:hsqldb:file:${project.build.directory}/hsqldb/sample;shutdown=true</url>
               <logging>off</logging>
             </configuration>
           </execution>

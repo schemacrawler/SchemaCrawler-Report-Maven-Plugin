@@ -4,23 +4,23 @@
  * http://www.schemacrawler.com
  * Copyright (c) 2011-2020, Sualeh Fatehi.
  *
- * This library is free software; you can redistribute it and/or modify it under the terms
- * of the GNU Lesser General Public License as published by the Free Software Foundation;
- * either version 2.1 of the License, or (at your option) any later version.
+ * This library is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU Lesser General Public License as published by the Free Software Foundation; either version
+ * 2.1 of the License, or (at your option) any later version.
  *
- * This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Lesser General Public License for more details.
+ * This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public License along with this
- * library; if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330,
- * Boston, MA 02111-1307, USA.
+ * You should have received a copy of the GNU Lesser General Public License along with this library;
+ * if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
+ * 02111-1307, USA.
  *
  */
 package schemacrawler.tools.integration.maven;
 
-import static org.apache.commons.lang.StringUtils.isBlank;
 
+import static us.fatehi.utility.Utility.isBlank;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -34,8 +34,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
-
-import org.apache.commons.lang.StringUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.plugin.logging.Log;
@@ -43,7 +41,6 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.reporting.AbstractMavenReport;
 import org.apache.maven.reporting.MavenReportException;
-
 import schemacrawler.Main;
 
 /** Generates a SchemaCrawler report of the database. */
@@ -171,11 +168,11 @@ public class SchemaCrawlerMojo extends AbstractMavenReport {
   /**
    * {@inheritDoc}
    *
-   * @see org.apache.maven.reporting.MavenReport#getOutputName()
+   * @see org.apache.maven.reporting.MavenReport#getDescription(java.util.Locale)
    */
   @Override
-  public String getOutputName() {
-    return "schemacrawler-report";
+  public String getDescription(final Locale locale) {
+    return getName(locale);
   }
 
   /**
@@ -191,11 +188,11 @@ public class SchemaCrawlerMojo extends AbstractMavenReport {
   /**
    * {@inheritDoc}
    *
-   * @see org.apache.maven.reporting.MavenReport#getDescription(java.util.Locale)
+   * @see org.apache.maven.reporting.MavenReport#getOutputName()
    */
   @Override
-  public String getDescription(final Locale locale) {
-    return getName(locale);
+  public String getOutputName() {
+    return "schemacrawler-report";
   }
 
   @Override
@@ -210,7 +207,7 @@ public class SchemaCrawlerMojo extends AbstractMavenReport {
 
       // Get the Maven Doxia Sink, which will be used to generate the
       // various elements of the document
-      Sink mainSink = getSink();
+      final Sink mainSink = getSink();
       if (mainSink == null) {
         throw new MavenReportException("Could not get the Doxia sink");
       }
@@ -242,14 +239,6 @@ public class SchemaCrawlerMojo extends AbstractMavenReport {
       mainSink.body_();
     } catch (final Exception e) {
       throw new MavenReportException("Error executing SchemaCrawler report", e);
-    }
-  }
-
-  private String getOutputFilename() {
-    if (outputfile == null || StringUtils.isBlank(outputfile)) {
-      return String.format("schemacrawler-output.%s", outputformat);
-    } else {
-      return Paths.get(outputfile).getFileName().toString();
     }
   }
 
@@ -351,8 +340,7 @@ public class SchemaCrawlerMojo extends AbstractMavenReport {
     // Output into a temporary file
     final Path outputFile =
         Paths.get(System.getProperty("java.io.tmpdir"), UUID.randomUUID().toString() + ".tmp")
-            .toAbsolutePath()
-            .normalize();
+            .toAbsolutePath().normalize();
     argsMap.put("--output-file", outputFile.toString());
 
     // Build command-line
@@ -374,5 +362,13 @@ public class SchemaCrawlerMojo extends AbstractMavenReport {
     logger.info("Completed SchemaCrawler execution");
 
     return outputFile;
+  }
+
+  private String getOutputFilename() {
+    if (outputfile == null || isBlank(outputfile)) {
+      return String.format("schemacrawler-output.%s", outputformat);
+    } else {
+      return Paths.get(outputfile).getFileName().toString();
+    }
   }
 }

@@ -59,7 +59,7 @@
     <!-- Properties for Site documentation (may not use period)... -->
     <SchemacrawlerVersion>${schemacrawler.version}</SchemacrawlerVersion>
     <doxiaVersion>1.11.1</doxiaVersion>
-    <mavenPluginVersion>3.9.1</mavenPluginVersion>
+    <mavenPluginVersion>3.9.2</mavenPluginVersion>
   </properties>
   <dependencies>
     <dependency>
@@ -119,7 +119,7 @@
     <dependency>
       <groupId>org.apache.maven.plugin-tools</groupId>
       <artifactId>maven-plugin-annotations</artifactId>
-      <version>3.8.1</version>
+      <version>3.8.2</version>
       <scope>provided</scope>
     </dependency>
     <!-- SchemaCrawler Maven reporting commandline -->
@@ -196,7 +196,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-gpg-plugin</artifactId>
-          <version>3.0.1</version>
+          <version>3.1.0</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -206,7 +206,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-invoker-plugin</artifactId>
-          <version>3.5.0</version>
+          <version>3.5.1</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -221,7 +221,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-plugin-plugin</artifactId>
-          <version>3.8.1</version>
+          <version>3.8.2</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -251,7 +251,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>3.0.0</version>
+          <version>3.1.0</version>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -354,12 +354,12 @@
             <plugin>
               <groupId>org.apache.maven.plugins</groupId>
               <artifactId>maven-invoker-plugin</artifactId>
-              <version>3.5.0</version>
+              <version>3.5.1</version>
             </plugin>
             <plugin>
               <groupId>org.apache.maven.plugins</groupId>
               <artifactId>maven-plugin-plugin</artifactId>
-              <version>3.8.1</version>
+              <version>3.8.2</version>
             </plugin>
             <plugin>
               <groupId>org.codehaus.mojo</groupId>
@@ -388,7 +388,7 @@
       <plugin>
         <groupId>org.liquibase</groupId>
         <artifactId>liquibase-maven-plugin</artifactId>
-        <version>4.20.0</version>
+        <version>4.22.0</version>
         <executions>
           <execution>
             <id>build.sample.hsqldb</id>

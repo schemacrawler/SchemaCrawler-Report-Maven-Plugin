@@ -19,7 +19,6 @@
  */
 package schemacrawler.tools.integration.maven;
 
-
 import static us.fatehi.utility.Utility.isBlank;
 import java.io.File;
 import java.io.IOException;
@@ -340,7 +339,8 @@ public class SchemaCrawlerMojo extends AbstractMavenReport {
     // Output into a temporary file
     final Path outputFile =
         Paths.get(System.getProperty("java.io.tmpdir"), UUID.randomUUID().toString() + ".tmp")
-            .toAbsolutePath().normalize();
+            .toAbsolutePath()
+            .normalize();
     argsMap.put("--output-file", outputFile.toString());
 
     // Build command-line

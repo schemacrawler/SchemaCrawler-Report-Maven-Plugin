@@ -28,10 +28,10 @@ jobs:
 
 # BUILD AND TEST
     - id: build-test
-      name: Build and run tests
+      name: Build and run integration tests
       shell: bash
       run: |
         mvn \
           --no-transfer-progress \
           --batch-mode \
-          integration-test package
+          integration-test

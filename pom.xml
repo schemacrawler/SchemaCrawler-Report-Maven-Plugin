@@ -59,7 +59,7 @@
     <!-- Properties for Site documentation (may not use period)... -->
     <SchemacrawlerVersion>${schemacrawler.version}</SchemacrawlerVersion>
     <doxiaVersion>1.11.1</doxiaVersion>
-    <mavenPluginVersion>3.9.3</mavenPluginVersion>
+    <mavenPluginVersion>3.9.4</mavenPluginVersion>
   </properties>
   <dependencies>
     <dependency>

@@ -1,4 +1,4 @@
-![Quick Build](https://github.com/schemacrawler/SchemaCrawler-Report-Maven-Plugin/workflows/Quick%20Build/badge.svg)
+[![Integration Tests](https://github.com/schemacrawler/SchemaCrawler-Report-Maven-Plugin/actions/workflows/integration-tests.yml/badge.svg)](https://github.com/schemacrawler/SchemaCrawler-Report-Maven-Plugin/actions/workflows/integration-tests.yml)
 [![The Central Repository](https://img.shields.io/maven-central/v/us.fatehi/schemacrawler-maven-plugin.svg)](https://search.maven.org/search?q=g:us.fatehi%20a:schemacrawler*)
 
 

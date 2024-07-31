@@ -1,5 +1,5 @@
 [![Integration Tests](https://github.com/schemacrawler/SchemaCrawler-Report-Maven-Plugin/actions/workflows/integration-tests.yml/badge.svg)](https://github.com/schemacrawler/SchemaCrawler-Report-Maven-Plugin/actions/workflows/integration-tests.yml)
-[![The Central Repository](https://img.shields.io/maven-central/v/us.fatehi/schemacrawler-maven-plugin.svg)](https://search.maven.org/search?q=g:us.fatehi%20a:schemacrawler*)
+[![The Central Repository](https://img.shields.io/maven-central/v/us.fatehi/schemacrawler-maven-plugin.svg)](https://central.sonatype.com/search?q=us.fatehi.schemacrawler&sort=name)
 
 
 # <img src="https://raw.githubusercontent.com/schemacrawler/SchemaCrawler/main/schemacrawler-website/src/site/resources/images/schemacrawler_logo.png" height="100px" width="100px" valign="middle"/>  SchemaCrawler Report Maven Plugin

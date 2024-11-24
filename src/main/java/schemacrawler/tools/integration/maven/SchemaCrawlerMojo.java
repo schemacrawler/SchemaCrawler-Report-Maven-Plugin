@@ -19,7 +19,6 @@
  */
 package schemacrawler.tools.integration.maven;
 
-import static us.fatehi.utility.Utility.isBlank;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -40,7 +39,9 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.reporting.AbstractMavenReport;
 import org.apache.maven.reporting.MavenReportException;
+import static us.fatehi.utility.Utility.isBlank;
 import schemacrawler.Main;
+import schemacrawler.tools.command.text.schema.options.PortableType;
 
 /** Generates a SchemaCrawler report of the database. */
 @Mojo(name = "schemacrawler", requiresReports = true, threadSafe = true)
@@ -297,7 +298,7 @@ public class SchemaCrawlerMojo extends AbstractMavenReport {
       argsMap.put("--no-remarks", Boolean.TRUE.toString());
     }
     if (portablenames) {
-      argsMap.put("--portable-names", Boolean.TRUE.toString());
+      argsMap.put("--portable", PortableType.names.name());
     }
 
     // Sort command
@@ -367,8 +368,7 @@ public class SchemaCrawlerMojo extends AbstractMavenReport {
   private String getOutputFilename() {
     if (outputfile == null || isBlank(outputfile)) {
       return String.format("schemacrawler-output.%s", outputformat);
-    } else {
-      return Paths.get(outputfile).getFileName().toString();
     }
+    return Paths.get(outputfile).getFileName().toString();
   }
 }

@@ -1,3 +1,6 @@
+> [!WARNING]
+> This project is no longer actively maintained.
+
 [![Integration Tests](https://github.com/schemacrawler/SchemaCrawler-Report-Maven-Plugin/actions/workflows/integration-tests.yml/badge.svg)](https://github.com/schemacrawler/SchemaCrawler-Report-Maven-Plugin/actions/workflows/integration-tests.yml)
 [![The Central Repository](https://img.shields.io/maven-central/v/us.fatehi/schemacrawler-maven-plugin.svg)](https://central.sonatype.com/search?q=us.fatehi.schemacrawler&sort=name)
 
